@@ -9,7 +9,7 @@ renderFilter(`Past`, `filter-past`);
 let countEvent = 0;
 while (countEvent < 7) {
   countEvent++;
-  renderEvent(`Taxi`, `Taxi to Airport`, [`Order UBER +€ 20`, `Upgrade to business +€ 20`])
+  renderEvent(`Taxi`, `Taxi to Airport`, [`Order UBER +€ 20`, `Upgrade to business +€ 20`]);
 }
 
 renderRandomCards();
