@@ -1,17 +1,15 @@
 const eventWrapper = document.querySelector(`.trip-day__items`);
-eventWrapper.innerHTML = ``;
-
 const typeEvents = {
   'Taxi': `🚕`,
   'Flight': `✈️`,
   'Drive': `🚗`,
   'Check-in': `🏨`
 };
+eventWrapper.innerHTML = ``;
+
 const makeOffers = (data) => {
   return data.map((item) => {
-    return `<li>
-              <button class="trip-point__offer">${item}</button>
-            </li>`;
+    return `<li><button class="trip-point__offer">${item}</button></li>`;
   }).join(``);
 };
 const makeEvent = (type, name, offers) => {
@@ -27,7 +25,7 @@ const makeEvent = (type, name, offers) => {
             ${makeOffers(offers)}
           </ul>
         </article>`;
-  eventWrapper.insertAdjacentHTML(`beforeend`, template)
+  eventWrapper.insertAdjacentHTML(`beforeend`, template);
 };
 
 export default makeEvent;
