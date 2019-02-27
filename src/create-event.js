@@ -3,7 +3,7 @@ const typeEvents = {
   'Taxi': `🚕`,
   'Flight': `✈️`,
   'Drive': `🚗`,
-  'Check-in': `🏨`
+  'Check-in': `🏨`,
 };
 eventWrapper.innerHTML = ``;
 
@@ -13,7 +13,7 @@ const makeOffers = (data) => {
   }).join(``);
 };
 const makeEvent = (type, name, offers) => {
-  const template = `<article class="trip-point">
+  return `<article class="trip-point">
           <i class="trip-icon">${typeEvents[type]}</i>
           <h3 class="trip-point__title">${name}</h3>
           <p class="trip-point__schedule">
@@ -25,7 +25,6 @@ const makeEvent = (type, name, offers) => {
             ${makeOffers(offers)}
           </ul>
         </article>`;
-  eventWrapper.insertAdjacentHTML(`beforeend`, template);
 };
 
 export default makeEvent;
