@@ -1,4 +1,5 @@
 import templateEvent from "./create-event";
+import {generateEvent} from "./data";
 
 const MAX_AMOUNT_CARDS = 16;
 const filterList = document.querySelector(`.trip-filter`);
@@ -9,7 +10,7 @@ const bindEventRender = () => {
     const randomNumber = Math.ceil(Math.random() * MAX_AMOUNT_CARDS);
     eventWrapper.innerHTML = ``;
     for (let i = 0; i < randomNumber; i++) {
-      eventWrapper.insertAdjacentHTML(`beforeend`, templateEvent(`Taxi`, `Taxi to Airport`, [`Order UBER +€ 20`, `Upgrade to business +€ 20`]));
+      eventWrapper.insertAdjacentHTML(`beforeend`, templateEvent(generateEvent()));
     }
   });
 };
