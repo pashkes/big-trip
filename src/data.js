@@ -1,4 +1,12 @@
-const typeEvents = {
+const START_DATE = new Date(2019, 1, 1);
+const END_DATE = new Date(2020, 1, 1);
+const MAX_COST = 300;
+const MIN_COST = 10;
+const MAX_OFFERS = 2;
+const MAX_PHOTOS = 10;
+const MAX_SENTENCES = 3;
+const MAX_CARDS = 13;
+const TYPE_EVENTS = {
   'Taxi': `🚕`,
   'Bus': `🚌`,
   'Train': `🚂`,
@@ -19,14 +27,7 @@ const DESC = [
 ];
 const CITIES = [`Amsterdam`, `Geneva`, `Chamonix`, `London`, `Berlin`, `Vienna`, `Paris`, `Manchester`];
 const NAMES = [`Taxi to Airport`, `Flight to Geneva`, `Drive to Chamonix`, `Check into a hotel`];
-const START_DATE = new Date(2019, 1, 1);
-const END_DATE = new Date(2020, 1, 1);
-const MAX_COST = 300;
-const MIN_COST = 10;
-const MAX_OFFERS = 2;
-const MAX_PHOTOS = 10;
-const MAX_SENTENCES = 3;
-const MAX_CARDS = 13;
+
 const getRandomInt = (max = 1, min = 0) => {
   min = Math.ceil(min);
   max = Math.floor(max);
@@ -39,6 +40,7 @@ const getRandomInt = (max = 1, min = 0) => {
 const getRandomDate = (start, end) => {
   return new Date(getRandomInt(end, start));
 };
+
 const doMixOfArray = (array, elements) => {
   const clone = [...array];
   const result = [];
@@ -59,7 +61,7 @@ const getRandomPhotos = (count) => {
 };
 
 const generateEvent = () => {
-  const keysOfEvent = Object.keys(typeEvents);
+  const keysOfEvent = Object.keys(TYPE_EVENTS);
   const randomDate = getRandomDate(START_DATE, END_DATE);
   const hour = randomDate.getHours();
   const minutes = randomDate.getMinutes();
@@ -92,4 +94,5 @@ const returnListOfEvents = () => {
   }
   return listOfEvents;
 };
-export {typeEvents, returnListOfEvents};
+
+export {TYPE_EVENTS, returnListOfEvents};

@@ -1,4 +1,4 @@
-import {typeEvents} from "./data";
+import {TYPE_EVENTS} from "./data";
 
 const eventWrapper = document.querySelector(`.trip-day__items`);
 
@@ -10,7 +10,7 @@ const makeOffers = (data) => {
 };
 const makeEvent = (data) => {
   return `<article class="trip-point">
-          <i class="trip-icon">${typeEvents[data.type]}</i>
+          <i class="trip-icon">${TYPE_EVENTS[data.type]}</i>
           <h3 class="trip-point__title">${data.name}</h3>
           <p class="trip-point__schedule">
             <span class="trip-point__timetable">${data.time.from}&nbsp;&mdash; ${data.time.to}</span>

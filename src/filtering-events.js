@@ -7,10 +7,9 @@ const eventWrapper = document.querySelector(`.trip-day__items`);
 const bindEventRender = () => {
   filterList.addEventListener(`change`, () => {
     const listOfEvents = returnListOfEvents();
+    const htmlMarkupEvents = listOfEvents.map((item) => templateEvent(item)).join(``);
     eventWrapper.innerHTML = ``;
-    for (let item of listOfEvents) {
-      eventWrapper.insertAdjacentHTML(`beforeend`, templateEvent(item));
-    }
+    eventWrapper.insertAdjacentHTML(`beforeend`, htmlMarkupEvents);
   });
 };
 
