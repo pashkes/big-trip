@@ -42,14 +42,14 @@ const getRandomDate = (start, end) => {
 };
 
 const doMixOfArray = (array, elements) => {
-  const clone = [...array];
-  const result = [];
+  const cloneItems = [...array];
+  const mixedItems = [];
   for (let i = 0; i < elements; i++) {
-    let indexRandomElement = getRandomInt(clone.length - 1, 0);
-    result.push(clone[indexRandomElement]);
-    clone.splice(indexRandomElement, 1);
+    let indexRandomOfElement = getRandomInt(cloneItems.length - 1, 0);
+    mixedItems.push(cloneItems[indexRandomOfElement]);
+    cloneItems.splice(indexRandomOfElement, 1);
   }
-  return result;
+  return mixedItems;
 };
 
 const getRandomPhotos = (count) => {

@@ -5,8 +5,8 @@ const eventContaiter = document.querySelector(`.trip-day__items`);
 
 const renderEvents = ()=> {
   const listOfEvent = returnListOfEvents();
-  const htmlEvents = listOfEvent.map((item) => template(item)).join(``);
-  eventContaiter.insertAdjacentHTML(`beforeend`, htmlEvents);
+  const markupOfEvents = listOfEvent.map((item) => template(item)).join(``);
+  eventContaiter.insertAdjacentHTML(`beforeend`, markupOfEvents);
 };
 
 export default renderEvents;
