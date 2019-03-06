@@ -1,11 +1,13 @@
 import template from "./create-event";
+import {returnListOfEvents} from "./data";
 
 const eventContaiter = document.querySelector(`.trip-day__items`);
+
 const renderEvents = ()=> {
-  const MAX_CARDS = 7;
-  for (let i = 0; i < MAX_CARDS; i++) {
-    eventContaiter.insertAdjacentHTML(`beforeend`, template(`Taxi`, `Taxi to Airport`, [`Order UBER +€ 20`, `Upgrade to business +€ 20`]));
-  }
+  const listOfEvent = returnListOfEvents();
+  const markupOfEvents = listOfEvent.map((item) => template(item)).join(``);
+  eventContaiter.innerHTML = ``;
+  eventContaiter.insertAdjacentHTML(`beforeend`, markupOfEvents);
 };
 
 export default renderEvents;
