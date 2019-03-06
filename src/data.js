@@ -41,10 +41,10 @@ const getRandomDate = (start, end) => {
   return new Date(getRandomInt(end, start));
 };
 
-const doMixOfArray = (array, elements) => {
+const doMixOfArray = (array, count) => {
   const cloneItems = [...array];
   const mixedItems = [];
-  for (let i = 0; i < elements; i++) {
+  for (let i = 0; i < count; i++) {
     let indexRandomOfElement = getRandomInt(cloneItems.length - 1, 0);
     mixedItems.push(cloneItems[indexRandomOfElement]);
     cloneItems.splice(indexRandomOfElement, 1);
