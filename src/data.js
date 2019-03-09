@@ -5,7 +5,6 @@ const MIN_COST = 10;
 const MAX_OFFERS = 2;
 const MAX_PHOTOS = 10;
 const MAX_SENTENCES = 3;
-const MAX_CARDS = 13;
 const TYPE_EVENTS = {
   'Taxi': `🚕`,
   'Bus': `🚌`,
@@ -68,7 +67,7 @@ const generateEvent = () => {
   return {
     date: {
       month: randomDate.getMonth() + 1,
-      monthString: new Intl.DateTimeFormat(`en-US`, {month: `short`}).format(randomDate),
+      monthShortName: new Intl.DateTimeFormat(`en-US`, {month: `short`}).format(randomDate),
       day: randomDate.getDay() + 1,
     },
     type: keysOfEvent[Math.floor(Math.random() * keysOfEvent.length)],
@@ -86,13 +85,4 @@ const generateEvent = () => {
   };
 };
 
-const returnListOfEvents = () => {
-  const listOfEvents = [];
-  const cardAmount = getRandomInt(MAX_CARDS, 1);
-  for (let i = 0; i < cardAmount; i++) {
-    listOfEvents.push(generateEvent());
-  }
-  return listOfEvents;
-};
-
-export {TYPE_EVENTS, returnListOfEvents};
+export {generateEvent, TYPE_EVENTS};

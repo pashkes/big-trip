@@ -1,7 +1,7 @@
 import renderFilter from "./render-filter";
-import renderRandomCards from "./filtering-events";
-import renderEvents from "./render-events";
+import renderRandomCards from "./filtering-waypoint";
+import renderWaipoint from "./create-waypoint";
 
-renderEvents();
+renderWaipoint();
 renderRandomCards();
 renderFilter();
