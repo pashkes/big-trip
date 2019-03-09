@@ -12,11 +12,12 @@ class EditWaypoint {
     this._description = data.description;
     this._name = data.name;
     this._offers = data.offers;
+
+    this._onSubmit = null;
     this._element = null;
   }
 
   get template() {
-    const markupOfPhotos = this._photos.map((photoSrc) => `<img src="${photoSrc}" alt="picture from place" class="point__destination-image">`).join(``).trim();
     return `
       <article class="point">
         <form action="" method="get">
@@ -120,7 +121,7 @@ class EditWaypoint {
               <h3 class="point__details-title">Destination</h3>
               <p class="point__destination-text">${this._description}</p>
               <div class="point__destination-images">
-                ${markupOfPhotos}
+                ${this._photos.map((photoSrc) => `<img src="${photoSrc}" alt="picture from place" class="point__destination-image">`).join(``).trim()}
               </div>
             </section>
             <input type="hidden" class="point__total-price" name="total-price" value="">
@@ -134,14 +135,25 @@ class EditWaypoint {
     return this._element;
   }
 
+  unrender() {
+    this.unBind();
+    this._element = null;
+  }
+
   get element() {
     return this._element;
   }
 
-  set bind(fn) {
+  bind() {
+    this.element.querySelector(`.point__button--save`).addEventListener(`click`, this._onSubmit);
+  }
+
+  unBind() {
   }
 
   set onSubmit(fn) {
+    this._onSubmit = fn;
+    this.bind();
   }
 
   set onReset(fn) {

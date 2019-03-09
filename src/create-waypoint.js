@@ -8,13 +8,22 @@ const openedWaypoint = new EditWaypoint(generateEvent());
 
 const renderWaipoint = () => {
   eventContaiter.innerHTML = ``;
-  eventContaiter.appendChild(waypointComponent.render());
-  waypointComponent.bind = ()=> {
-    waypointComponent.onClick = ()=> {
-      openedWaypoint.render();
-      eventContaiter.replaceChild(openedWaypoint.element, waypointComponent.element);
-    };
+  waypointComponent.render();
+  eventContaiter.appendChild(waypointComponent.element);
+
+  waypointComponent.onClick = () => {
+    openedWaypoint.render();
+    eventContaiter.replaceChild(openedWaypoint.element, waypointComponent.element);
+    openedWaypoint.unrender();
   };
+
+  openedWaypoint.onSubmit = () => {
+    waypointComponent.render();
+    eventContaiter.replaceChild(waypointComponent.element, openedWaypoint.element);
+    waypointComponent.unrender();
+  };
+
 };
 
 export default renderWaipoint;
+

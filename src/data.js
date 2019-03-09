@@ -64,6 +64,7 @@ const generateEvent = () => {
   const randomDate = getRandomDate(START_DATE, END_DATE);
   const hour = randomDate.getHours();
   const minutes = randomDate.getMinutes();
+  const endDate = getRandomDate(randomDate, END_DATE);
   return {
     date: {
       month: randomDate.getMonth() + 1,
@@ -75,8 +76,8 @@ const generateEvent = () => {
     name: `${NAMES[getRandomInt(NAMES.length - 1)]}`,
     time: {
       from: `${hour}:${minutes}`,
-      to: `${randomDate.getHours() + 1}:${randomDate.getMinutes()}`,
-      duration: (randomDate.getTime() + (1000 * 60 * 60 * 24) - randomDate.getTime()) / 1000 / 60 / 60 / 24,
+      to: `${endDate.getHours()}:${endDate.getMinutes()}`,
+      duration: Math.floor((endDate.getTime() - randomDate.getTime()) / 1000 / 60 / 60),
     },
     price: getRandomInt(MAX_COST, MIN_COST),
     offers: doMixOfArray(OFFERS, getRandomInt(MAX_OFFERS, 0)),

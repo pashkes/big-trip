@@ -15,11 +15,12 @@ class Waypoint {
     this._duration = data.time.duration;
     this._price = data.price;
     this._offers = data.offers;
+
+    this._onClick = null;
     this._element = null;
   }
 
   get template() {
-    const offers = this._offers.map((item) => `<li><button class="trip-point__offer">${item}</button></li>`).join(``);
     return `<article class="trip-point">
           <i class="trip-icon">${this._type}</i>
           <h3 class="trip-point__title">${this._name}</h3>
@@ -29,26 +30,35 @@ class Waypoint {
           </p>
           <p class="trip-point__price">&euro;&nbsp;${this._price}</p>
           <ul class="trip-point__offers">
-            ${offers}
+            ${this._offers.map((item) => `<li><button class="trip-point__offer">${item}</button></li>`).join(``)}
           </ul>
         </article>`;
   }
+
   get element() {
     return this._element;
   }
+
   render() {
     this._element = createElement(this.template);
     return this._element;
   }
 
-  set bind(func) {
-    this._element.addEventListener(`click`, func);
+  unrender() {
+    this.unBind();
+    this._element = null;
   }
 
-  unBind() {}
+  bind() {
+    this._element.addEventListener(`click`, this._onClick);
+  }
+
+  unBind() {
+  }
 
   set onClick(func) {
-    func();
+    this._onClick = func;
+    this.bind();
   }
 }
 
