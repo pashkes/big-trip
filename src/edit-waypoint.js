@@ -10,10 +10,9 @@ class EditWaypoint {
     this._price = data.price;
     this._photos = data.photos;
     this._description = data.description;
-    this._name = data.name;
-    this._offers = data.offers;
 
     this._onSubmit = null;
+    this._onReset = null;
     this._element = null;
   }
 
@@ -132,31 +131,21 @@ class EditWaypoint {
 
   render() {
     this._element = createElement(this.template);
-    return this._element;
-  }
-
-  unrender() {
-    this.unBind();
-    this._element = null;
-  }
-
-  get element() {
+    this.bind();
     return this._element;
   }
 
   bind() {
-    this.element.querySelector(`.point__button--save`).addEventListener(`click`, this._onSubmit);
-  }
-
-  unBind() {
+    this._element.addEventListener(`submit`, this._onSubmit.bind(this));
+    this._element.addEventListener(`reset`, this._onReset.bind(this));
   }
 
   set onSubmit(fn) {
     this._onSubmit = fn;
-    this.bind();
   }
 
   set onReset(fn) {
+    this._onReset = fn;
   }
 }
 

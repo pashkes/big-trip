@@ -35,30 +35,18 @@ class Waypoint {
         </article>`;
   }
 
-  get element() {
-    return this._element;
-  }
-
   render() {
     this._element = createElement(this.template);
+    this.bind();
     return this._element;
-  }
-
-  unrender() {
-    this.unBind();
-    this._element = null;
   }
 
   bind() {
     this._element.addEventListener(`click`, this._onClick);
   }
 
-  unBind() {
-  }
-
   set onClick(func) {
     this._onClick = func;
-    this.bind();
   }
 }
 
