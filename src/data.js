@@ -5,7 +5,6 @@ const MIN_COST = 10;
 const MAX_OFFERS = 2;
 const MAX_PHOTOS = 10;
 const MAX_SENTENCES = 3;
-const MAX_CARDS = 13;
 const TYPE_EVENTS = {
   'Taxi': `🚕`,
   'Bus': `🚌`,
@@ -65,10 +64,11 @@ const generateEvent = () => {
   const randomDate = getRandomDate(START_DATE, END_DATE);
   const hour = randomDate.getHours();
   const minutes = randomDate.getMinutes();
+  const endDate = getRandomDate(randomDate, END_DATE);
   return {
     date: {
       month: randomDate.getMonth() + 1,
-      monthString: new Intl.DateTimeFormat(`en-US`, {month: `short`}).format(randomDate),
+      monthShortName: new Intl.DateTimeFormat(`en-US`, {month: `short`}).format(randomDate),
       day: randomDate.getDay() + 1,
     },
     type: keysOfEvent[Math.floor(Math.random() * keysOfEvent.length)],
@@ -76,8 +76,8 @@ const generateEvent = () => {
     name: `${NAMES[getRandomInt(NAMES.length - 1)]}`,
     time: {
       from: `${hour}:${minutes}`,
-      to: `${randomDate.getHours() + 1}:${randomDate.getMinutes()}`,
-      duration: (randomDate.getTime() + (1000 * 60 * 60 * 24) - randomDate.getTime()) / 1000 / 60 / 60 / 24,
+      to: `${endDate.getHours()}:${endDate.getMinutes()}`,
+      duration: Math.floor((endDate.getTime() - randomDate.getTime()) / 1000 / 60 / 60),
     },
     price: getRandomInt(MAX_COST, MIN_COST),
     offers: doMixOfArray(OFFERS, getRandomInt(MAX_OFFERS, 0)),
@@ -86,13 +86,4 @@ const generateEvent = () => {
   };
 };
 
-const returnListOfEvents = () => {
-  const listOfEvents = [];
-  const cardAmount = getRandomInt(MAX_CARDS, 1);
-  for (let i = 0; i < cardAmount; i++) {
-    listOfEvents.push(generateEvent());
-  }
-  return listOfEvents;
-};
-
-export {TYPE_EVENTS, returnListOfEvents};
+export {generateEvent, TYPE_EVENTS};
