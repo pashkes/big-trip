@@ -1,13 +1,9 @@
 import {TYPE_EVENTS} from "./data";
+import Component from "./component";
 
-const createElement = (template) => {
-  const newElement = document.createElement(`div`);
-  newElement.innerHTML = template;
-  return newElement.firstChild;
-};
-
-class Waypoint {
+class Waypoint extends Component {
   constructor(data) {
+    super();
     this._type = TYPE_EVENTS[data.type];
     this._name = data.name;
     this._timeFrom = data.time.from;
@@ -17,7 +13,6 @@ class Waypoint {
     this._offers = data.offers;
 
     this._onClick = null;
-    this._element = null;
   }
 
   get template() {
@@ -35,12 +30,6 @@ class Waypoint {
         </article>`;
   }
 
-  render() {
-    this._element = createElement(this.template);
-    this.bind();
-    return this._element;
-  }
-
   bind() {
     this._element.addEventListener(`click`, this._onClick);
   }
@@ -50,4 +39,4 @@ class Waypoint {
   }
 }
 
-export {Waypoint, createElement};
+export default Waypoint;
