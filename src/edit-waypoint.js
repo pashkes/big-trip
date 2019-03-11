@@ -1,8 +1,9 @@
 import {TYPE_EVENTS} from "./data";
-import {createElement} from "./waypoint";
+import Component from "./component";
 
-class EditWaypoint {
+class EditWaypoint extends Component {
   constructor(data) {
+    super();
     this._type = TYPE_EVENTS[data.type];
     this._city = data.city;
     this._timeFrom = data.time.from;
@@ -13,7 +14,6 @@ class EditWaypoint {
 
     this._onSubmit = null;
     this._onReset = null;
-    this._element = null;
   }
 
   get template() {
@@ -129,15 +129,9 @@ class EditWaypoint {
       </article>`.trim();
   }
 
-  render() {
-    this._element = createElement(this.template);
-    this.bind();
-    return this._element;
-  }
-
   bind() {
-    this._element.addEventListener(`submit`, this._onSubmit.bind(this));
-    this._element.addEventListener(`reset`, this._onReset.bind(this));
+    this._element.addEventListener(`submit`, this._onSubmit);
+    this._element.addEventListener(`reset`, this._onReset);
   }
 
   set onSubmit(fn) {

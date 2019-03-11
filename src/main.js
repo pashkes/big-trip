@@ -1,6 +1,6 @@
 import renderFilter from "./render-filter";
 import renderRandomCards from "./filtering-waypoint";
-import {Waypoint} from "./waypoint";
+import Waypoint from "./waypoint";
 import EditWaypoint from "./edit-waypoint";
 import {generateEvent} from "./data";
 
@@ -14,17 +14,19 @@ const openedWaypoint = new EditWaypoint(generateEvent());
 eventContaiter.innerHTML = ``;
 waypointComponent.onClick = () => {
   openedWaypoint.render();
-  eventContaiter.replaceChild(openedWaypoint._element, waypointComponent._element);
+  eventContaiter.replaceChild(openedWaypoint.element, waypointComponent._element);
+  waypointComponent.destroy();
 };
 
 openedWaypoint.onSubmit = (evt) => {
   evt.preventDefault();
   waypointComponent.render();
-  eventContaiter.replaceChild(waypointComponent._element, openedWaypoint._element);
+  eventContaiter.replaceChild(waypointComponent.element, openedWaypoint._element);
+  openedWaypoint.destroy();
 };
 openedWaypoint.onReset = () => {
   // do something
 };
 waypointComponent.render();
-eventContaiter.appendChild(waypointComponent._element);
+eventContaiter.appendChild(waypointComponent.element);
 
