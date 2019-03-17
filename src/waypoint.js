@@ -1,7 +1,7 @@
 import {TYPE_EVENTS} from "./data";
 import Component from "./component";
 import moment from 'moment';
-import format from 'moment-duration-format';
+// import format from 'moment-duration-format';
 
 class Waypoint extends Component {
   constructor(data) {
@@ -18,7 +18,7 @@ class Waypoint extends Component {
   get template() {
     const startDate = moment(this._dateFrom);
     const endDate = moment(this._dateTo);
-    const duration = moment.duration(endDate.diff(startDate)).format(`hh:mm`);
+    const duration = endDate.diff(startDate, `hours`);
     return `<article class="trip-point">
           <i class="trip-icon">${this._type}</i>
           <h3 class="trip-point__title">Flight to ${this._city}</h3>
