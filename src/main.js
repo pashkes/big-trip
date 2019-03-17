@@ -6,10 +6,10 @@ import {generateEvent} from "./data";
 
 renderRandomCards();
 renderFilter();
-
+const data = generateEvent();
 const eventContaiter = document.querySelector(`.trip-day__items`);
-const waypointComponent = new Waypoint(generateEvent());
-const openedWaypoint = new EditWaypoint(generateEvent());
+const waypointComponent = new Waypoint(data);
+const openedWaypoint = new EditWaypoint(data);
 
 eventContaiter.innerHTML = ``;
 waypointComponent.onClick = () => {
@@ -18,8 +18,14 @@ waypointComponent.onClick = () => {
   waypointComponent.destroy();
 };
 
-openedWaypoint.onSubmit = (evt) => {
-  evt.preventDefault();
+openedWaypoint.onSubmit = (newObject) => {
+  data.type = newObject.type;
+  data.city = newObject.offers;
+  data.date.from = newObject.date.from;
+  data.date.to = newObject.date.to;
+  data.price = newObject.price;
+  data.offers = newObject.offers;
+  waypointComponent.update(newObject);
   waypointComponent.render();
   eventContaiter.replaceChild(waypointComponent.element, openedWaypoint._element);
   openedWaypoint.destroy();

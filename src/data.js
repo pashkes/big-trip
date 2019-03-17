@@ -6,18 +6,19 @@ const MAX_OFFERS = 2;
 const MAX_PHOTOS = 10;
 const MAX_SENTENCES = 3;
 const TYPE_EVENTS = {
-  'Taxi': `🚕`,
-  'Bus': `🚌`,
-  'Train': `🚂`,
+  'taxi': `🚕`,
+  'bus': `🚌`,
+  'train': `🚂`,
   'Ship': `🛳️`,
   'Transport': `🚊`,
   'Drive': `🚗`,
-  'Flight': `✈️`,
-  'Sightseeing': `🏛️`,
-  'Check-in': `🏨`,
+  'flight': `✈️`,
+  'sight-seeing': `🏛️`,
+  'check-in': `🏨`,
   'Restaurant': `🍴`,
 };
 const OFFERS = [`Add luggage`, `Switch to comfort class`, `Add meal`, `Choose seats`];
+
 const DESC = [
   `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras aliquet varius magna, non porta ligula feugiat eget. Fusce tristique felis at fermentum pharetra. Aliquam id orci ut lectus varius viverra.`,
   `Nullam nunc ex, convallis sed finibus eget, sollicitudin eget ante. Phasellus eros mauris, condimentum sed nibh vitae, sodales efficitur ipsum.`,
@@ -25,7 +26,6 @@ const DESC = [
   `Sed sed nisi sed augue convallis suscipit in sed felis.`, `Aliquam erat volutpat. Nunc fermentum tortor ac porta dapibus. In rutrum ac purus sit amet tempus.`,
 ];
 const CITIES = [`Amsterdam`, `Geneva`, `Chamonix`, `London`, `Berlin`, `Vienna`, `Paris`, `Manchester`];
-const NAMES = [`Taxi to Airport`, `Flight to Geneva`, `Drive to Chamonix`, `Check into a hotel`];
 
 const getRandomInt = (max = 1, min = 0) => {
   min = Math.ceil(min);
@@ -61,26 +61,18 @@ const getRandomPhotos = (count) => {
 
 const generateEvent = () => {
   const keysOfEvent = Object.keys(TYPE_EVENTS);
-  const randomDate = getRandomDate(START_DATE, END_DATE);
-  const hour = randomDate.getHours();
-  const minutes = randomDate.getMinutes();
-  const endDate = getRandomDate(randomDate, END_DATE);
+  const startDate = getRandomDate(START_DATE, END_DATE);
+  const endDate = getRandomDate(startDate, END_DATE);
   return {
-    date: {
-      month: randomDate.getMonth() + 1,
-      monthShortName: new Intl.DateTimeFormat(`en-US`, {month: `short`}).format(randomDate),
-      day: randomDate.getDay() + 1,
-    },
     type: keysOfEvent[Math.floor(Math.random() * keysOfEvent.length)],
     city: CITIES[Math.floor(Math.random() * CITIES.length)],
-    name: `${NAMES[getRandomInt(NAMES.length - 1)]}`,
-    time: {
-      from: `${hour}:${minutes}`,
-      to: `${endDate.getHours()}:${endDate.getMinutes()}`,
-      duration: Math.floor((endDate.getTime() - randomDate.getTime()) / 1000 / 60 / 60),
+    date: {
+      from: startDate,
+      to: endDate,
+      duration: 1,
     },
     price: getRandomInt(MAX_COST, MIN_COST),
-    offers: doMixOfArray(OFFERS, getRandomInt(MAX_OFFERS, 0)),
+    offers: new Set(doMixOfArray(OFFERS, getRandomInt(MAX_OFFERS, 0))),
     photos: getRandomPhotos(getRandomInt(MAX_PHOTOS, 1)),
     description: doMixOfArray(DESC, getRandomInt(MAX_SENTENCES, 1)),
   };
