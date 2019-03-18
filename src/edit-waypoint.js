@@ -1,7 +1,6 @@
 import {TYPE_EVENTS} from "./data";
 import Component from "./component";
 import flatpickr from "flatpickr";
-import moment from 'moment';
 
 class EditWaypoint extends Component {
   constructor(data) {
@@ -12,7 +11,7 @@ class EditWaypoint extends Component {
     this._timeTo = data.date.to;
     this._price = data.price;
     this._photos = data.photos;
-    this._offers = data.offers;
+    // this._offers = data.offers;
     this._description = data.description;
     this._onSubmitButtonClick = this._onSubmitButtonClick.bind(this);
     this._onSubmit = null;
@@ -72,7 +71,7 @@ class EditWaypoint extends Component {
       
             <label class="point__time">
               choose time
-              <input class="point__input range-time" type="text" value="${moment(this._timeFrom).format(`hh:mm`)} — ${moment(this._timeTo).format(`hh:mm`)}" name="time" placeholder="00:00 — 00:00">
+              <input class="point__input range-time" type="text" value="" name="time" placeholder="00:00 — 00:00">
             </label>
       
             <label class="point__price">
