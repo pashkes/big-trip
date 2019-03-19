@@ -1,17 +1,19 @@
 import {TYPE_EVENTS} from "./data";
 import Component from "./component";
+import flatpickr from "flatpickr";
 
 class EditWaypoint extends Component {
   constructor(data) {
     super();
     this._type = TYPE_EVENTS[data.type];
     this._city = data.city;
-    this._timeFrom = data.time.from;
-    this._timeTo = data.time.to;
+    this._timeFrom = data.date.from;
+    this._timeTo = data.date.to;
     this._price = data.price;
     this._photos = data.photos;
+    // this._offers = data.offers;
     this._description = data.description;
-
+    this._onSubmitButtonClick = this._onSubmitButtonClick.bind(this);
     this._onSubmit = null;
     this._onReset = null;
   }
@@ -42,7 +44,7 @@ class EditWaypoint extends Component {
                   <input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-train" name="travel-way" value="train">
                   <label class="travel-way__select-label" for="travel-way-train">🚂 train</label>
       
-                  <input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-flight" name="travel-way" value="train" checked>
+                  <input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-flight" name="travel-way" value="flight" checked>
                   <label class="travel-way__select-label" for="travel-way-flight">✈️ flight</label>
                 </div>
       
@@ -69,7 +71,7 @@ class EditWaypoint extends Component {
       
             <label class="point__time">
               choose time
-              <input class="point__input" type="text" value="${this._timeTo} — ${this._timeFrom}" name="time" placeholder="${this._timeTo} — ${this._timeFrom}">
+              <input class="point__input range-time" type="text" value="" name="time" placeholder="00:00 — 00:00">
             </label>
       
             <label class="point__price">
@@ -92,7 +94,6 @@ class EditWaypoint extends Component {
           <section class="point__details">
             <section class="point__offers">
               <h3 class="point__details-title">offers</h3>
-      
               <div class="point__offers-wrap">
                 <input class="point__offers-input visually-hidden" type="checkbox" id="add-luggage" name="offer" value="add-luggage">
                 <label for="add-luggage" class="point__offers-label">
@@ -120,7 +121,7 @@ class EditWaypoint extends Component {
               <h3 class="point__details-title">Destination</h3>
               <p class="point__destination-text">${this._description}</p>
               <div class="point__destination-images">
-                ${this._photos.map((photoSrc) => `<img src="${photoSrc}" alt="picture from place" class="point__destination-image">`).join(``).trim()}
+                ${this._photos ? this._photos.map((photoSrc) => `<img src="${photoSrc}" alt="picture from place" class="point__destination-image">`).join(``).trim() : ``}
               </div>
             </section>
             <input type="hidden" class="point__total-price" name="total-price" value="">
@@ -129,13 +130,97 @@ class EditWaypoint extends Component {
       </article>`.trim();
   }
 
+  _onSubmitButtonClick(evt) {
+    evt.preventDefault();
+    const formData = new FormData(this._element.querySelector(`form`));
+    const newDate = this._processForm(formData);
+    if (typeof this._onSubmit === `function`) {
+      this._onSubmit(newDate);
+    }
+    this.update(newDate);
+  }
+
+  _onChangeType(evt) {
+    const selectedWay = (this.closest(`.travel-way`)).querySelector(`.travel-way__label`);
+    selectedWay.textContent = TYPE_EVENTS[evt.target.value];
+  }
+
+  _initDatePicked() {
+    flatpickr(this._element.querySelector(`.range-time`), {
+      'mode': `range`,
+      'enableTime': true,
+      'dateFormat': `h:m`,
+      'defaultDate': [this._timeFrom, this._timeTo],
+      'minDate': `today`,
+      'time_24hr': true,
+      onChange(selectedDates) {
+        this._timeFrom = selectedDates[0];
+        this._timeTo = selectedDates[1];
+      },
+    });
+  }
+
   bind() {
-    this._element.addEventListener(`submit`, this._onSubmit);
+    this._element.addEventListener(`submit`, this._onSubmitButtonClick);
     this._element.addEventListener(`reset`, this._onReset);
+    this._element.querySelector(`.travel-way__select`).addEventListener(`change`, this._onChangeType);
+    this._initDatePicked();
+  }
+
+  update(data) {
+    this._type = TYPE_EVENTS[data.type];
+    this._city = data.city;
+    this._timeFrom = data.date.from;
+    this._timeTo = data.date.to;
+    this._price = data.price;
+    this._photos = data.photos;
+    this._offers = data.offers;
+    this._description = data.description;
   }
 
   set onSubmit(fn) {
     this._onSubmit = fn;
+  }
+
+  _processForm(formData) {
+    const entry = {
+      type: ``,
+      city: ``,
+      date: {
+        from: this._timeFrom,
+        to: this._timeTo,
+      },
+      price: ``,
+      offers: new Set(),
+      description: this._description,
+      photos: this._photos
+    };
+    const editMapper = EditWaypoint.createMapper(entry);
+    for (let item of formData.entries()) {
+      const [property, value] = item;
+      if (editMapper[property]) {
+        editMapper[property](value);
+      }
+    }
+    return entry;
+  }
+
+  static createMapper(target) {
+    return {
+      'travel-way': (value) => {
+        target.type = value;
+      },
+      'destination': (value) => {
+        target.city = value;
+      },
+      'price': (value) => {
+        target.price = value;
+      },
+      'offer': (value) => {
+        target.offers.add(value);
+      },
+    };
+
   }
 
   set onReset(fn) {

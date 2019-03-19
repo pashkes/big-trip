@@ -24,6 +24,7 @@ class Component {
   destroy() {
     this._element = null;
   }
+  update() {}
   get element() {
     return this._element;
   }
