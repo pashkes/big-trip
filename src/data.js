@@ -1,4 +1,5 @@
-const START_DATE = new Date(2019, 1, 1);
+const COUNT_EVENTS = 12;
+const START_DATE = new Date(2018, 1, 1);
 const END_DATE = new Date(2020, 1, 1);
 const MAX_COST = 300;
 const MIN_COST = 10;
@@ -18,7 +19,6 @@ const TYPE_EVENTS = {
   'Restaurant': `🍴`,
 };
 const OFFERS = [`Add luggage`, `Switch to comfort class`, `Add meal`, `Choose seats`];
-
 const DESC = [
   `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras aliquet varius magna, non porta ligula feugiat eget. Fusce tristique felis at fermentum pharetra. Aliquam id orci ut lectus varius viverra.`,
   `Nullam nunc ex, convallis sed finibus eget, sollicitudin eget ante. Phasellus eros mauris, condimentum sed nibh vitae, sodales efficitur ipsum.`,
@@ -78,4 +78,12 @@ const generateEvent = () => {
   };
 };
 
-export {generateEvent, TYPE_EVENTS};
+const getMockData = () => {
+  const events = [];
+  for (let i = 0; i < COUNT_EVENTS; i++) {
+    events.push(generateEvent());
+  }
+  return events;
+};
+
+export {getMockData, TYPE_EVENTS};

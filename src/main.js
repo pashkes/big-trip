@@ -1,38 +1,102 @@
-import renderFilter from "./render-filter";
-import renderRandomCards from "./filtering-waypoint";
+import Filter from "./filter";
 import Waypoint from "./waypoint";
 import EditWaypoint from "./edit-waypoint";
-import {generateEvent} from "./data";
+import {getMockData} from "./data";
 
-renderRandomCards();
-renderFilter();
-const data = generateEvent();
+const filters = [
+  {
+    id: `filter-everything`,
+    name: `Everything`,
+    isChecked: true,
+    value: `everything`,
+  },
+  {
+    id: `filter-filter-future`,
+    name: `Future`,
+    isChecked: false,
+    value: `future`,
+  },
+  {
+    id: `filter-past`,
+    name: `Past`,
+    isChecked: false,
+    value: `past`,
+  },
+];
+const mockData = getMockData();
 const eventContaiter = document.querySelector(`.trip-day__items`);
-const waypointComponent = new Waypoint(data);
-const openedWaypoint = new EditWaypoint(data);
+const listOfFilter = document.querySelector(`.trip-filter`);
 
-eventContaiter.innerHTML = ``;
-waypointComponent.onClick = () => {
-  openedWaypoint.render();
-  eventContaiter.replaceChild(openedWaypoint.element, waypointComponent._element);
-  waypointComponent.destroy();
+const updateEvent = (events, index, newEvent) => {
+  events[index] = Object.assign({}, events[index], newEvent);
+  return events[index];
 };
 
-openedWaypoint.onSubmit = (newObject) => {
-  data.type = newObject.type;
-  data.city = newObject.offers;
-  data.date.from = newObject.date.from;
-  data.date.to = newObject.date.to;
-  data.price = newObject.price;
-  data.offers = newObject.offers;
-  waypointComponent.update(newObject);
-  waypointComponent.render();
-  eventContaiter.replaceChild(waypointComponent.element, openedWaypoint._element);
-  openedWaypoint.destroy();
+const deleteEvent = (events, index) => {
+  events.splice(index, 1);
+  return events;
 };
-openedWaypoint.onReset = () => {
-  // do something
-};
-waypointComponent.render();
-eventContaiter.appendChild(waypointComponent.element);
 
+const renderEvents = (data) => {
+  eventContaiter.innerHTML = ``;
+  for (let i = 0; i < data.length; i++) {
+    let item = data[i];
+    const waypointComponent = new Waypoint(item);
+    const openedWaypoint = new EditWaypoint(item);
+
+    waypointComponent.onClick = () => {
+      openedWaypoint.render();
+      eventContaiter.replaceChild(openedWaypoint.element, waypointComponent._element);
+      waypointComponent.destroy();
+    };
+
+    openedWaypoint.onSubmit = (newObject) => {
+      const update = updateEvent(data, i, newObject);
+      waypointComponent.update(update);
+      waypointComponent.render();
+      eventContaiter.replaceChild(waypointComponent.element, openedWaypoint._element);
+      openedWaypoint.destroy();
+    };
+
+    openedWaypoint.onDelete = () => {
+      deleteEvent(data, i);
+      openedWaypoint.destroy();
+    };
+
+    waypointComponent.render();
+    eventContaiter.appendChild(waypointComponent.element);
+  }
+};
+
+const filterEvents = (events, eventName) => {
+  const currentdate = new Date();
+
+  switch (eventName) {
+    case `filter-filter-future`:
+      return mockData.filter((it) => it.date.from.getTime() > currentdate.getTime());
+    case `filter-past`:
+      return mockData.filter((it) => it.date.from.getTime() < currentdate.getTime());
+    default:
+      return mockData;
+  }
+};
+
+const renderFilters = () => {
+  listOfFilter.innerHTML = ``;
+  for (let item of filters) {
+    const filter = new Filter(item);
+    filter.render();
+
+    filter.onFilter = () => {
+      eventContaiter.innerHTML = ``;
+      const id = (filter.element.querySelector(`input`)).id;
+      const filteredEvents = filterEvents(filters, id);
+      renderEvents(filteredEvents);
+    };
+
+    listOfFilter.appendChild(filter.element);
+  }
+};
+
+renderFilters();
+renderEvents(mockData);

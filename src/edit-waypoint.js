@@ -15,7 +15,7 @@ class EditWaypoint extends Component {
     this._description = data.description;
     this._onSubmitButtonClick = this._onSubmitButtonClick.bind(this);
     this._onSubmit = null;
-    this._onReset = null;
+    this._onDelete = this._onDeleteButtonClick.bind(this);
   }
 
   get template() {
@@ -140,6 +140,13 @@ class EditWaypoint extends Component {
     this.update(newDate);
   }
 
+  _onDeleteButtonClick(evt) {
+    evt.preventDefault();
+    if (typeof this._onDelete === `function`) {
+      this._onDelete();
+    }
+  }
+
   _onChangeType(evt) {
     const selectedWay = (this.closest(`.travel-way`)).querySelector(`.travel-way__label`);
     selectedWay.textContent = TYPE_EVENTS[evt.target.value];
@@ -149,7 +156,7 @@ class EditWaypoint extends Component {
     flatpickr(this._element.querySelector(`.range-time`), {
       'mode': `range`,
       'enableTime': true,
-      'dateFormat': `h:m`,
+      'dateFormat': `H:m`,
       'defaultDate': [this._timeFrom, this._timeTo],
       'minDate': `today`,
       'time_24hr': true,
@@ -162,7 +169,7 @@ class EditWaypoint extends Component {
 
   bind() {
     this._element.addEventListener(`submit`, this._onSubmitButtonClick);
-    this._element.addEventListener(`reset`, this._onReset);
+    this._element.addEventListener(`reset`, this._onDelete);
     this._element.querySelector(`.travel-way__select`).addEventListener(`change`, this._onChangeType);
     this._initDatePicked();
   }
@@ -193,7 +200,7 @@ class EditWaypoint extends Component {
       price: ``,
       offers: new Set(),
       description: this._description,
-      photos: this._photos
+      photos: this._photos,
     };
     const editMapper = EditWaypoint.createMapper(entry);
     for (let item of formData.entries()) {
@@ -223,8 +230,8 @@ class EditWaypoint extends Component {
 
   }
 
-  set onReset(fn) {
-    this._onReset = fn;
+  set onDelete(fn) {
+    this._onDelete = fn;
   }
 }
 
