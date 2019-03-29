@@ -2,6 +2,7 @@ import Filter from "./filter";
 import Waypoint from "./waypoint";
 import EditWaypoint from "./edit-waypoint";
 import {getMockData} from "./data";
+import updateData from "./statistic";
 
 const filters = [
   {
@@ -23,10 +24,89 @@ const filters = [
     value: `past`,
   },
 ];
+const viewMode = document.querySelectorAll(`.view-switch__item`);
 const mockData = getMockData();
 const eventContaiter = document.querySelector(`.trip-day__items`);
 const listOfFilter = document.querySelector(`.trip-filter`);
+const typeEvents = {
+  'flight': {
+    spentMoney: 0
+  },
+  'check-in': {
+    spentMoney: 0
+  },
+  'Drive': {
+    spentMoney: 0
+  },
+  'sight-seeing': {
+    used: 0
+  },
+  'Restaurant': {
+    used: 0
+  },
+  'taxi': {
+    used: 0
+  },
+  'train': {
+    used: 0
+  },
+  'Transport': {
+    used: 0,
+  },
+  'Ship': {
+    used: 0
+  },
+  'bus': {
+    used: 0
+  },
+};
+const keysOfCategories = Object.keys(typeEvents);
 
+const getSpentMoney = (data) => {
+  const resultData = [];
+  for (let key of keysOfCategories) {
+    const hasKey = data.some((it) => it.type === key);
+    if (hasKey) {
+      const filter = data.filter((it) => it.type === key).map((it) => it.price);
+      resultData.push(filter.reduce((a, c) => c + a));
+    } else {
+      resultData.push(0);
+    }
+  }
+  return resultData;
+};
+
+const getCountUsed = (data) => {
+  for (let key of keysOfCategories) {
+    data.forEach((it) => {
+      if (it.type === key) {
+        typeEvents[key].used += 1;
+      }
+    });
+  }
+};
+
+const onClickToggleModeView = () => {
+  viewMode.forEach((item) => {
+    item.addEventListener(`click`, (evt) => {
+      evt.preventDefault();
+      const target = evt.target;
+      const previousModeLink = document.querySelector(`.view-switch__item--active`);
+      const lastHash = previousModeLink.hash.substring(1);
+      const currentHash = target.hash.substring(1);
+      const previousModeElement = document.querySelector(`#${lastHash}`);
+      const targetElement = document.querySelector(`#${currentHash}`);
+      previousModeLink.classList.remove(`view-switch__item--active`);
+      targetElement.classList.remove(`visually-hidden`);
+      previousModeElement.classList.add(`visually-hidden`);
+      target.classList.add(`view-switch__item--active`);
+    });
+  });
+};
+const transfromData = (data) => {
+  return getSpentMoney(data);
+  // getCountUsed(data);
+};
 const updateEvent = (events, index, newEvent) => {
   events[index] = Object.assign({}, events[index], newEvent);
   return events[index];
@@ -56,16 +136,19 @@ const renderEvents = (data) => {
       waypointComponent.render();
       eventContaiter.replaceChild(waypointComponent.element, openedWaypoint._element);
       openedWaypoint.destroy();
+      updateData(transfromData(data));
     };
 
     openedWaypoint.onDelete = () => {
       deleteEvent(data, i);
       openedWaypoint.destroy();
+      updateData(transfromData(data));
     };
 
     waypointComponent.render();
     eventContaiter.appendChild(waypointComponent.element);
   }
+  updateData(transfromData(data));
 };
 
 const filterEvents = (events, eventName) => {
@@ -100,3 +183,4 @@ const renderFilters = () => {
 
 renderFilters();
 renderEvents(mockData);
+onClickToggleModeView();
