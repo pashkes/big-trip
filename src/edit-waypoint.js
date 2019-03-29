@@ -221,7 +221,7 @@ class EditWaypoint extends Component {
         target.city = value;
       },
       'price': (value) => {
-        target.price = value;
+        target.price = +value;
       },
       'offer': (value) => {
         target.offers.add(value);
