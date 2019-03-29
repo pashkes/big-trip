@@ -28,48 +28,54 @@ const viewMode = document.querySelectorAll(`.view-switch__item`);
 const mockData = getMockData();
 const eventContaiter = document.querySelector(`.trip-day__items`);
 const listOfFilter = document.querySelector(`.trip-filter`);
+const moneyCategories = [`flight`, `check-in`, `Drive`, `sight-seeing`, `Restaurant`, `taxi`, `Ship`, `train`, `bus`];
 
-const moneyCategories = [`flight`, `check-in`, `Drive`, `sight-seeing`, `Restaurant`, `taxi`];
+const typesOfTransport = new Map([
+  [`Drive`, 0],
+  [`taxi`, 0],
+  [`flight`, 0],
+  [`Ship`, 0],
+  [`train`, 0],
+  [`bus`, 0],
+]);
 
-const transport = {
-  'train': {
-    used: 0
-  },
-  'Transport': {
-    used: 0,
-  },
-  'Ship': {
-    used: 0
-  },
-  'bus': {
-    used: 0
-  },
+const getCountUsed = (data) => {
+  const countUses = [];
+
+  // clear
+  typesOfTransport.forEach((it) => typesOfTransport.set(it, 0));
+  for (let item of typesOfTransport.entries()) {
+    const [key, value] = item;
+    typesOfTransport.set(key, 0);
+    data.forEach((it) => {
+      if (it.type === key) {
+        typesOfTransport.set(key, typesOfTransport.get(key) + 1);
+      }
+    });
+    countUses.push(value);
+  }
+  return countUses;
 };
 
-
 const getSpentMoney = (data) => {
-  const resultData = [];
+  const spentMoney = [];
   for (let item of moneyCategories) {
     const hasKey = data.some((it) => it.type === item);
     if (hasKey) {
       const filter = data.filter((it) => it.type === item).map((it) => it.price);
-      resultData.push(filter.reduce((a, c) => c + a));
+      spentMoney.push(filter.reduce((a, c) => c + a));
     } else {
-      resultData.push(0);
+      spentMoney.push(0);
     }
   }
-  return resultData;
+  return spentMoney;
 };
 
-const getCountUsed = (data) => {
-  const keys = Object.keys(transport);
-  for (let key of keys) {
-    data.forEach((it) => {
-      if (it.type === key) {
-        transport[key].used += 1;
-      }
-    });
-  }
+const transfromData = (data) => {
+  return {
+    spentMoney: getSpentMoney(data),
+    wasUsed: getCountUsed(data),
+  };
 };
 
 const onClickToggleModeView = () => {
@@ -80,6 +86,7 @@ const onClickToggleModeView = () => {
       if (target.closest(`.view-switch__item--active`)) {
         return;
       }
+
       const previousModeLink = document.querySelector(`.view-switch__item--active`);
       const lastHash = previousModeLink.hash.substring(1);
       const currentHash = target.hash.substring(1);
@@ -92,10 +99,7 @@ const onClickToggleModeView = () => {
     });
   });
 };
-const transfromData = (data) => {
-  return getSpentMoney(data);
-  // getCountUsed(data);
-};
+
 const updateEvent = (events, index, newEvent) => {
   events[index] = Object.assign({}, events[index], newEvent);
   return events[index];
@@ -130,6 +134,7 @@ const renderEvents = (data) => {
 
     openedWaypoint.onDelete = () => {
       deleteEvent(data, i);
+      updateData(transfromData(data));
       openedWaypoint.destroy();
       updateData(transfromData(data));
     };
@@ -172,4 +177,5 @@ const renderFilters = () => {
 
 renderFilters();
 renderEvents(mockData);
+updateData(transfromData(mockData));
 onClickToggleModeView();

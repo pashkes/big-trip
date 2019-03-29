@@ -7,23 +7,26 @@ const transportCtx = document.querySelector(`.statistic__transport`);
 const timeSpendCtx = document.querySelector(`.statistic__time-spend`);
 // Рассчитаем высоту канваса в зависимости от того, сколько данных в него будет передаваться
 const BAR_HEIGHT = 55;
-moneyCtx.height = BAR_HEIGHT * 6;
-transportCtx.height = BAR_HEIGHT * 4;
+moneyCtx.height = BAR_HEIGHT * 9;
+transportCtx.height = BAR_HEIGHT * 6;
 timeSpendCtx.height = BAR_HEIGHT * 4;
 
 const updateData = (data) => {
-  console.log(data);
   moneyChart.data.datasets.forEach((it) => {
-    it.data = data;
+    it.data = data.spentMoney;
+  });
+  transportChart.data.datasets.forEach((it) => {
+    it.data = data.wasUsed;
   });
   moneyChart.update();
+  transportChart.update();
 };
 
 const moneyChart = new Chart(moneyCtx, {
   plugins: [ChartDataLabels],
   type: `horizontalBar`,
   data: {
-    labels: [`✈️ FLY`, `🏨 STAY`, `🚗 DRIVE`, `🏛️ LOOK`, `🏨 EAT`, `🚕 RIDE`],
+    labels: [`✈️ FLY`, `🏨 STAY`, `🚗 DRIVE`, `🏛️ LOOK`, `🍴 EAT`, `🚕 RIDE`, `🛳️ SAIL`, `🚂 TRAIN`, `🚌 BUS`],
     datasets: [{
       data: [400, 300, 200, 160, 150, 100],
       backgroundColor: `#ffffff`,
@@ -88,7 +91,7 @@ const transportChart = new Chart(transportCtx, {
   plugins: [ChartDataLabels],
   type: `horizontalBar`,
   data: {
-    labels: [`🚗 DRIVE`, `🚕 RIDE`, `✈️ FLY`, `🛳️ SAIL`],
+    labels: [`🚗 DRIVE`, `🚕 RIDE`, `✈️ FLY`, `🛳️ SAIL`, `🚂 TRAIN`, `🚌 BUS`],
     datasets: [{
       data: [4, 3, 2, 1],
       backgroundColor: `#ffffff`,
