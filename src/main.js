@@ -77,6 +77,9 @@ const onClickToggleModeView = () => {
     item.addEventListener(`click`, (evt) => {
       evt.preventDefault();
       const target = evt.target;
+      if (target.closest(`.view-switch__item--active`)) {
+        return;
+      }
       const previousModeLink = document.querySelector(`.view-switch__item--active`);
       const lastHash = previousModeLink.hash.substring(1);
       const currentHash = target.hash.substring(1);
