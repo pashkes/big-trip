@@ -28,25 +28,10 @@ const viewMode = document.querySelectorAll(`.view-switch__item`);
 const mockData = getMockData();
 const eventContaiter = document.querySelector(`.trip-day__items`);
 const listOfFilter = document.querySelector(`.trip-filter`);
-const typeEvents = {
-  'flight': {
-    spentMoney: 0
-  },
-  'check-in': {
-    spentMoney: 0
-  },
-  'Drive': {
-    spentMoney: 0
-  },
-  'sight-seeing': {
-    used: 0
-  },
-  'Restaurant': {
-    used: 0
-  },
-  'taxi': {
-    used: 0
-  },
+
+const moneyCategories = [`flight`, `check-in`, `Drive`, `sight-seeing`, `Restaurant`, `taxi`];
+
+const transport = {
   'train': {
     used: 0
   },
@@ -60,14 +45,14 @@ const typeEvents = {
     used: 0
   },
 };
-const keysOfCategories = Object.keys(typeEvents);
+
 
 const getSpentMoney = (data) => {
   const resultData = [];
-  for (let key of keysOfCategories) {
-    const hasKey = data.some((it) => it.type === key);
+  for (let item of moneyCategories) {
+    const hasKey = data.some((it) => it.type === item);
     if (hasKey) {
-      const filter = data.filter((it) => it.type === key).map((it) => it.price);
+      const filter = data.filter((it) => it.type === item).map((it) => it.price);
       resultData.push(filter.reduce((a, c) => c + a));
     } else {
       resultData.push(0);
@@ -77,10 +62,11 @@ const getSpentMoney = (data) => {
 };
 
 const getCountUsed = (data) => {
-  for (let key of keysOfCategories) {
+  const keys = Object.keys(transport);
+  for (let key of keys) {
     data.forEach((it) => {
       if (it.type === key) {
-        typeEvents[key].used += 1;
+        transport[key].used += 1;
       }
     });
   }

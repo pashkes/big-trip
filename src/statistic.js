@@ -12,7 +12,9 @@ transportCtx.height = BAR_HEIGHT * 4;
 timeSpendCtx.height = BAR_HEIGHT * 4;
 
 const updateData = (data) => {
-  moneyChart.data.datasets.data = data;
+  moneyChart.data.datasets.forEach((it) => {
+    it.data = data;
+  });
   moneyChart.update();
 };
 
