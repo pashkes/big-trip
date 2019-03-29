@@ -8,7 +8,7 @@ momentDurationFormatSetup(moment);
 class Waypoint extends Component {
   constructor(data) {
     super();
-    this._type = TYPE_EVENTS[data.type];
+    this._type = data.type;
     this._dateFrom = data.date.from;
     this._dateTo = data.date.to;
     this._duration = null;
@@ -22,9 +22,10 @@ class Waypoint extends Component {
     const startDate = moment(this._dateFrom);
     const endDate = moment(this._dateTo);
     this._duration = moment.duration(endDate.diff(startDate)).format(`h[H] m[M]`);
+    console.log(this._type);
 
     return `<article class="trip-point">
-          <i class="trip-icon">${this._type}</i>
+          <i class="trip-icon">${TYPE_EVENTS[this._type]}</i>
           <h3 class="trip-point__title">Flight to ${this._city}</h3>
           <p class="trip-point__schedule">
             <span class="trip-point__timetable">${startDate.format(`H:mm`)} — ${endDate.format(`H:mm`)}</span>
@@ -42,7 +43,7 @@ class Waypoint extends Component {
   }
 
   update(data) {
-    this._type = TYPE_EVENTS[data.type];
+    this._type = data.type;
     this._city = data.city;
     this._dateFrom = data.date.from;
     this._dateTo = data.date.to;

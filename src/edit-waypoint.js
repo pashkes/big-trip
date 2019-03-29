@@ -5,7 +5,7 @@ import flatpickr from "flatpickr";
 class EditWaypoint extends Component {
   constructor(data) {
     super();
-    this._type = TYPE_EVENTS[data.type];
+    this._type = data.type;
     this._city = data.city;
     this._timeFrom = data.date.from;
     this._timeTo = data.date.to;
@@ -29,7 +29,7 @@ class EditWaypoint extends Component {
             </label>
       
             <div class="travel-way">
-              <label class="travel-way__label" for="travel-way__toggle">${this._type}</label>
+              <label class="travel-way__label" for="travel-way__toggle">${TYPE_EVENTS[this._type]}</label>
       
               <input type="checkbox" class="travel-way__toggle visually-hidden" id="travel-way__toggle">
       
@@ -44,8 +44,11 @@ class EditWaypoint extends Component {
                   <input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-train" name="travel-way" value="train">
                   <label class="travel-way__select-label" for="travel-way-train">🚂 train</label>
       
-                  <input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-flight" name="travel-way" value="flight" checked>
+                  <input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-flight" name="travel-way" value="flight">
                   <label class="travel-way__select-label" for="travel-way-flight">✈️ flight</label>
+                  
+                 <input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-ship" name="travel-way" value="Ship" checked>
+                  <label class="travel-way__select-label" for="travel-way-flight">🛳️ ship</label>
                 </div>
       
                 <div class="travel-way__select-group">
@@ -175,7 +178,7 @@ class EditWaypoint extends Component {
   }
 
   update(data) {
-    this._type = TYPE_EVENTS[data.type];
+    this._type = data.type;
     this._city = data.city;
     this._timeFrom = data.date.from;
     this._timeTo = data.date.to;
