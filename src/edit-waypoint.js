@@ -159,10 +159,11 @@ class EditWaypoint extends Component {
     flatpickr(this._element.querySelector(`.range-time`), {
       'mode': `range`,
       'enableTime': true,
-      'dateFormat': `H:m`,
+      'dateFormat': `H:i`,
       'defaultDate': [this._timeFrom, this._timeTo],
       'minDate': `today`,
       'time_24hr': true,
+      'appendTo': this._element,
       onChange(selectedDates) {
         this._timeFrom = selectedDates[0];
         this._timeTo = selectedDates[1];
