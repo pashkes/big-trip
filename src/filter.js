@@ -10,7 +10,7 @@ class Filter extends Component {
   _onChangeFilter(evt) {
     evt.preventDefault();
     if (typeof this._onFilter === `function`) {
-      this._onFilter();
+      this._onFilter(evt);
     }
   }
 

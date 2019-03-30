@@ -1,103 +1,39 @@
 import Filter from "./filter";
 import Waypoint from "./waypoint";
 import EditWaypoint from "./edit-waypoint";
-import {getMockData} from "./data";
-import updateData from "./statistic";
+import updateData from "./statistics";
+import {getMockData, filters, moneyCategories, typesOfTransport} from "./data";
+import onClickToggleModeView from "./view-mode";
 
-const filters = [
-  {
-    id: `filter-everything`,
-    name: `Everything`,
-    isChecked: true,
-    value: `everything`,
-  },
-  {
-    id: `filter-filter-future`,
-    name: `Future`,
-    isChecked: false,
-    value: `future`,
-  },
-  {
-    id: `filter-past`,
-    name: `Past`,
-    isChecked: false,
-    value: `past`,
-  },
-];
-const viewMode = document.querySelectorAll(`.view-switch__item`);
 const mockData = getMockData();
 const eventContaiter = document.querySelector(`.trip-day__items`);
 const listOfFilter = document.querySelector(`.trip-filter`);
-const moneyCategories = [`flight`, `check-in`, `Drive`, `sight-seeing`, `Restaurant`, `taxi`, `Ship`, `train`, `bus`];
 
-const typesOfTransport = new Map([
-  [`Drive`, 0],
-  [`taxi`, 0],
-  [`flight`, 0],
-  [`Ship`, 0],
-  [`train`, 0],
-  [`bus`, 0],
-]);
-
-const getCountUsed = (data) => {
-  const countUses = [];
-
-  // clear
-  typesOfTransport.forEach((it) => typesOfTransport.set(it, 0));
-  for (let item of typesOfTransport.entries()) {
-    const [key, value] = item;
-    typesOfTransport.set(key, 0);
-    data.forEach((it) => {
-      if (it.type === key) {
-        typesOfTransport.set(key, typesOfTransport.get(key) + 1);
-      }
-    });
-    countUses.push(value);
-  }
-  return countUses;
-};
-
-const getSpentMoney = (data) => {
-  const spentMoney = [];
-  for (let item of moneyCategories) {
-    const hasKey = data.some((it) => it.type === item);
-    if (hasKey) {
-      const filter = data.filter((it) => it.type === item).map((it) => it.price);
-      spentMoney.push(filter.reduce((a, c) => c + a));
-    } else {
-      spentMoney.push(0);
+const getCountUsed = (data, statistics) => {
+  [...statistics.keys()].forEach((item) => statistics.set(item, 0));
+  for (let item of data) {
+    if (statistics.has(item.type)) {
+      statistics.set(item.type, statistics.get(item.type) + 1);
     }
   }
-  return spentMoney;
+  return statistics;
 };
 
-const transfromData = (data) => {
+const getSpentMoney = (data, statistics) => {
+  [...statistics.keys()].forEach((item) => statistics.set(item, 0));
+  for (let item of data) {
+    if (statistics.has(item.type)) {
+      statistics.set(item.type, statistics.get(item.type) + item.price);
+    }
+  }
+  return statistics;
+};
+
+const getStatistics = (data) => {
   return {
-    spentMoney: getSpentMoney(data),
-    wasUsed: getCountUsed(data),
+    spentMoney: getSpentMoney(data, moneyCategories),
+    wasUsed: getCountUsed(data, typesOfTransport),
   };
-};
-
-const onClickToggleModeView = () => {
-  viewMode.forEach((item) => {
-    item.addEventListener(`click`, (evt) => {
-      evt.preventDefault();
-      const target = evt.target;
-      if (target.closest(`.view-switch__item--active`)) {
-        return;
-      }
-
-      const previousModeLink = document.querySelector(`.view-switch__item--active`);
-      const lastHash = previousModeLink.hash.substring(1);
-      const currentHash = target.hash.substring(1);
-      const previousModeElement = document.querySelector(`#${lastHash}`);
-      const targetElement = document.querySelector(`#${currentHash}`);
-      previousModeLink.classList.remove(`view-switch__item--active`);
-      targetElement.classList.remove(`visually-hidden`);
-      previousModeElement.classList.add(`visually-hidden`);
-      target.classList.add(`view-switch__item--active`);
-    });
-  });
 };
 
 const updateEvent = (events, index, newEvent) => {
@@ -112,8 +48,7 @@ const deleteEvent = (events, index) => {
 
 const renderEvents = (data) => {
   eventContaiter.innerHTML = ``;
-  for (let i = 0; i < data.length; i++) {
-    let item = data[i];
+  data.forEach((item, index) => {
     const waypointComponent = new Waypoint(item);
     const openedWaypoint = new EditWaypoint(item);
 
@@ -124,58 +59,56 @@ const renderEvents = (data) => {
     };
 
     openedWaypoint.onSubmit = (newObject) => {
-      const update = updateEvent(data, i, newObject);
+      const update = updateEvent(data, index, newObject);
       waypointComponent.update(update);
       waypointComponent.render();
       eventContaiter.replaceChild(waypointComponent.element, openedWaypoint._element);
       openedWaypoint.destroy();
-      updateData(transfromData(data));
+      updateData(getStatistics(data));
     };
 
     openedWaypoint.onDelete = () => {
-      deleteEvent(data, i);
-      updateData(transfromData(data));
+      deleteEvent(data, index);
+      updateData(getStatistics(data));
       openedWaypoint.destroy();
-      updateData(transfromData(data));
+      updateData(getStatistics(data));
     };
 
     waypointComponent.render();
     eventContaiter.appendChild(waypointComponent.element);
-  }
-  updateData(transfromData(data));
+  });
+
+  updateData(getStatistics(data));
 };
 
-const filterEvents = (events, eventName) => {
-  const currentdate = new Date();
-
+const filterType = (data, events, eventName) => {
+  const currentDate = new Date();
   switch (eventName) {
-    case `filter-filter-future`:
-      return mockData.filter((it) => it.date.from.getTime() > currentdate.getTime());
-    case `filter-past`:
-      return mockData.filter((it) => it.date.from.getTime() < currentdate.getTime());
+    case `future`:
+      return data.filter((it) => it.date.from.getTime() > currentDate.getTime());
+    case `past`:
+      return data.filter((it) => it.date.from.getTime() < currentDate.getTime());
     default:
-      return mockData;
+      return data;
   }
 };
 
-const renderFilters = () => {
+const renderFilters = (filtersData, data) => {
   listOfFilter.innerHTML = ``;
-  for (let item of filters) {
+  for (let item of filtersData) {
     const filter = new Filter(item);
     filter.render();
 
-    filter.onFilter = () => {
+    filter.onFilter = (evt) => {
       eventContaiter.innerHTML = ``;
-      const id = (filter.element.querySelector(`input`)).id;
-      const filteredEvents = filterEvents(filters, id);
-      renderEvents(filteredEvents);
+      const events = filterType(data, filtersData, evt.target.value);
+      renderEvents(events);
     };
 
     listOfFilter.appendChild(filter.element);
   }
 };
 
-renderFilters();
+renderFilters(filters, mockData);
 renderEvents(mockData);
-updateData(transfromData(mockData));
 onClickToggleModeView();

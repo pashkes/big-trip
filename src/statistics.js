@@ -13,10 +13,10 @@ timeSpendCtx.height = BAR_HEIGHT * 4;
 
 const updateData = (data) => {
   moneyChart.data.datasets.forEach((it) => {
-    it.data = data.spentMoney;
+    it.data = [...data.spentMoney.values()];
   });
   transportChart.data.datasets.forEach((it) => {
-    it.data = data.wasUsed;
+    it.data = [...data.wasUsed.values()];
   });
   moneyChart.update();
   transportChart.update();

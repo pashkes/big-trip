@@ -1,4 +1,4 @@
-const COUNT_EVENTS = 32;
+const COUNT_EVENTS = 16;
 const START_DATE = new Date(2018, 1, 1);
 const END_DATE = new Date(2020, 1, 1);
 const MAX_COST = 300;
@@ -26,6 +26,45 @@ const DESC = [
   `Sed sed nisi sed augue convallis suscipit in sed felis.`, `Aliquam erat volutpat. Nunc fermentum tortor ac porta dapibus. In rutrum ac purus sit amet tempus.`,
 ];
 const CITIES = [`Amsterdam`, `Geneva`, `Chamonix`, `London`, `Berlin`, `Vienna`, `Paris`, `Manchester`];
+const moneyCategories = new Map([
+  [`flight`, 0],
+  [`check-in`, 0],
+  [`Drive`, 0],
+  [`sight-seeing`, 0],
+  [`Restaurant`, 0],
+  [`taxi`, 0],
+  [`Ship`, 0],
+  [`train`, 0],
+  [`bus`, 0]
+]);
+const typesOfTransport = new Map([
+  [`Drive`, 0],
+  [`taxi`, 0],
+  [`flight`, 0],
+  [`Ship`, 0],
+  [`train`, 0],
+  [`bus`, 0],
+]);
+const filters = [
+  {
+    id: `filter-everything`,
+    name: `Everything`,
+    isChecked: true,
+    value: `everything`,
+  },
+  {
+    id: `filter-future`,
+    name: `Future`,
+    isChecked: false,
+    value: `future`,
+  },
+  {
+    id: `filter-past`,
+    name: `Past`,
+    isChecked: false,
+    value: `past`,
+  },
+];
 
 const getRandomInt = (max = 1, min = 0) => {
   min = Math.ceil(min);
@@ -86,4 +125,4 @@ const getMockData = () => {
   return events;
 };
 
-export {getMockData, TYPE_EVENTS};
+export {getMockData, TYPE_EVENTS, filters, moneyCategories, typesOfTransport};

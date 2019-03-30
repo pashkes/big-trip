@@ -22,7 +22,6 @@ class Waypoint extends Component {
     const startDate = moment(this._dateFrom);
     const endDate = moment(this._dateTo);
     this._duration = moment.duration(endDate.diff(startDate)).format(`h[H] m[M]`);
-    console.log(this._type);
 
     return `<article class="trip-point">
           <i class="trip-icon">${TYPE_EVENTS[this._type]}</i>
