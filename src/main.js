@@ -46,9 +46,9 @@ const deleteEvent = (events, index) => {
   return events;
 };
 
-const renderEvents = (events) => {
+const renderEvents = (data) => {
   eventContaiter.innerHTML = ``;
-  events.forEach((item, index) => {
+  data.forEach((item, index) => {
     const waypointComponent = new Waypoint(item);
     const openedWaypoint = new EditWaypoint(item);
 
@@ -59,36 +59,37 @@ const renderEvents = (events) => {
     };
 
     openedWaypoint.onSubmit = (newObject) => {
-      const update = updateEvent(events, index, newObject);
+      const update = updateEvent(data, index, newObject);
       waypointComponent.update(update);
       waypointComponent.render();
       eventContaiter.replaceChild(waypointComponent.element, openedWaypoint._element);
       openedWaypoint.destroy();
-      updateData(getStatistics(events));
+      updateData(getStatistics(data));
     };
 
     openedWaypoint.onDelete = () => {
-      deleteEvent(events, index);
+      deleteEvent(data, index);
+      updateData(getStatistics(data));
       openedWaypoint.destroy();
-      updateData(getStatistics(events));
+      updateData(getStatistics(data));
     };
 
     waypointComponent.render();
     eventContaiter.appendChild(waypointComponent.element);
   });
 
-  updateData(getStatistics(events));
+  updateData(getStatistics(data));
 };
 
-const filterEvents = (events, filterType) => {
+const filterEvents = (data, filterType) => {
   const currentDate = new Date();
   switch (filterType) {
     case `future`:
-      return events.filter((it) => it.date.from.getTime() > currentDate.getTime());
+      return data.filter((it) => it.date.from.getTime() > currentDate.getTime());
     case `past`:
-      return events.filter((it) => it.date.from.getTime() < currentDate.getTime());
+      return data.filter((it) => it.date.from.getTime() < currentDate.getTime());
     default:
-      return events;
+      return data;
   }
 };
 
@@ -100,7 +101,7 @@ const renderFilters = (filtersData, data) => {
 
     filter.onFilter = (evt) => {
       eventContaiter.innerHTML = ``;
-      const events = filterEvents(data, filtersData, evt.target.value);
+      const events = filterEvents(data, evt.target.value);
       renderEvents(events);
     };
 
