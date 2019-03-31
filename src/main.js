@@ -46,9 +46,9 @@ const deleteEvent = (events, index) => {
   return events;
 };
 
-const renderEvents = (data) => {
+const renderEvents = (events) => {
   eventContaiter.innerHTML = ``;
-  data.forEach((item, index) => {
+  events.forEach((item, index) => {
     const waypointComponent = new Waypoint(item);
     const openedWaypoint = new EditWaypoint(item);
 
@@ -59,37 +59,37 @@ const renderEvents = (data) => {
     };
 
     openedWaypoint.onSubmit = (newObject) => {
-      const update = updateEvent(data, index, newObject);
+      const update = updateEvent(events, index, newObject);
       waypointComponent.update(update);
       waypointComponent.render();
       eventContaiter.replaceChild(waypointComponent.element, openedWaypoint._element);
       openedWaypoint.destroy();
-      updateData(getStatistics(data));
+      updateData(getStatistics(events));
     };
 
     openedWaypoint.onDelete = () => {
-      deleteEvent(data, index);
-      updateData(getStatistics(data));
+      deleteEvent(events, index);
+      updateData(getStatistics(events));
       openedWaypoint.destroy();
-      updateData(getStatistics(data));
+      updateData(getStatistics(events));
     };
 
     waypointComponent.render();
     eventContaiter.appendChild(waypointComponent.element);
   });
 
-  updateData(getStatistics(data));
+  updateData(getStatistics(events));
 };
 
-const filterType = (data, events, eventName) => {
+const filterEvents = (events, filterType) => {
   const currentDate = new Date();
-  switch (eventName) {
+  switch (filterType) {
     case `future`:
-      return data.filter((it) => it.date.from.getTime() > currentDate.getTime());
+      return events.filter((it) => it.date.from.getTime() > currentDate.getTime());
     case `past`:
-      return data.filter((it) => it.date.from.getTime() < currentDate.getTime());
+      return events.filter((it) => it.date.from.getTime() < currentDate.getTime());
     default:
-      return data;
+      return events;
   }
 };
 
@@ -101,7 +101,7 @@ const renderFilters = (filtersData, data) => {
 
     filter.onFilter = (evt) => {
       eventContaiter.innerHTML = ``;
-      const events = filterType(data, filtersData, evt.target.value);
+      const events = filterEvents(data, filtersData, evt.target.value);
       renderEvents(events);
     };
 

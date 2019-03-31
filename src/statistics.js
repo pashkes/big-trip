@@ -11,17 +11,6 @@ moneyCtx.height = BAR_HEIGHT * 9;
 transportCtx.height = BAR_HEIGHT * 6;
 timeSpendCtx.height = BAR_HEIGHT * 4;
 
-const updateData = (data) => {
-  moneyChart.data.datasets.forEach((it) => {
-    it.data = [...data.spentMoney.values()];
-  });
-  transportChart.data.datasets.forEach((it) => {
-    it.data = [...data.wasUsed.values()];
-  });
-  moneyChart.update();
-  transportChart.update();
-};
-
 const moneyChart = new Chart(moneyCtx, {
   plugins: [ChartDataLabels],
   type: `horizontalBar`,
@@ -151,5 +140,16 @@ const transportChart = new Chart(transportCtx, {
     },
   },
 });
+
+const updateData = (data) => {
+  moneyChart.data.datasets.forEach((it) => {
+    it.data = [...data.spentMoney.values()];
+  });
+  transportChart.data.datasets.forEach((it) => {
+    it.data = [...data.wasUsed.values()];
+  });
+  moneyChart.update();
+  transportChart.update();
+};
 
 export default updateData;
