@@ -69,7 +69,6 @@ const renderEvents = (events) => {
 
     openedWaypoint.onDelete = () => {
       deleteEvent(events, index);
-      updateData(getStatistics(events));
       openedWaypoint.destroy();
       updateData(getStatistics(events));
     };
