@@ -8,6 +8,7 @@ momentDurationFormatSetup(moment);
 class Waypoint extends Component {
   constructor(data) {
     super();
+    this._id = data.id;
     this._type = data.type;
     this._dateFrom = data.date.from;
     this._dateTo = data.date.to;
@@ -39,15 +40,6 @@ class Waypoint extends Component {
 
   bind() {
     this._element.addEventListener(`click`, this._onClick);
-  }
-
-  update(data) {
-    this._type = data.type;
-    this._city = data.city;
-    this._dateFrom = data.date.from;
-    this._dateTo = data.date.to;
-    this._price = data.price;
-    this._offers = data.offers;
   }
 
   set onClick(func) {

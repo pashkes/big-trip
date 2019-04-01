@@ -2,111 +2,113 @@ import Filter from "./filter";
 import Waypoint from "./waypoint";
 import EditWaypoint from "./edit-waypoint";
 import updateData from "./statistics";
-import {getMockData, filters, moneyCategories, typesOfTransport} from "./data";
+import {getMockData, filters, STATISTICS} from "./data";
 import onClickToggleModeView from "./view-mode";
 
-const mockData = getMockData();
 const eventContaiter = document.querySelector(`.trip-day__items`);
 const listOfFilter = document.querySelector(`.trip-filter`);
-const getCountUsed = (data, statistics) => {
-  statistics.forEach((item, key) => statistics.set(key, 0));
-  for (let item of data) {
-    if (statistics.has(item.type)) {
-      statistics.set(item.type, statistics.get(item.type) + 1);
+
+const state = {
+  events: getMockData(),
+  filter: `everything`
+};
+
+const getStatistics = (events) => {
+  STATISTICS.spentMoney.forEach((item, key) => STATISTICS.spentMoney.set(key, 0));
+  STATISTICS.wasUsed.forEach((item, key) => STATISTICS.wasUsed.set(key, 0));
+  events.forEach((item) => {
+    if (STATISTICS.spentMoney.has(item.type)) {
+      STATISTICS.spentMoney.set(item.type, STATISTICS.spentMoney.get(item.type) + item.price);
     }
-  }
-  return statistics;
-};
-
-const getSpentMoney = (data, statistics) => {
-  statistics.forEach((item, key) => statistics.set(key, 0));
-  for (let item of data) {
-    if (statistics.has(item.type)) {
-      statistics.set(item.type, statistics.get(item.type) + item.price);
+    if (STATISTICS.wasUsed.has(item.type)) {
+      STATISTICS.wasUsed.set(item.type, STATISTICS.wasUsed.get(item.type) + 1);
     }
-  }
-  return statistics;
+  });
+  return STATISTICS;
 };
 
-const getStatistics = (data) => {
-  return {
-    spentMoney: getSpentMoney(data, moneyCategories),
-    wasUsed: getCountUsed(data, typesOfTransport),
-  };
+const updateEvent = (newEvent) => {
+  const updatedItemIndex = state.events.findIndex((item) => item.id === newEvent.id);
+  return Object.assign(state.events[updatedItemIndex], newEvent);
 };
 
-const updateEvent = (events, index, newEvent) => {
-  events[index] = Object.assign({}, events[index], newEvent);
-  return events[index];
+const deleteEvent = (id) => {
+  const removedItemIndex = state.events.findIndex((item) => item.id === id);
+  const filtered = filterEvents(state.events, state.filter);
+  state.events.splice(removedItemIndex, 1);
+  renderEvents(filtered);
+  updateData(getStatistics(filtered));
 };
 
-const deleteEvent = (events, index) => {
-  events.splice(index, 1);
-  return events;
+const onSubmit = (newObject) => {
+  const filtered = filterEvents(state.events, state.filter);
+  updateEvent(newObject);
+  renderEvents(filtered);
+  updateData(getStatistics(filtered));
 };
 
-const renderEvents = (data) => {
-  eventContaiter.innerHTML = ``;
-  data.forEach((item, index) => {
+const renderEvents = (events) => {
+  const fragment = document.createDocumentFragment();
+
+  events.forEach((item) => {
     const waypointComponent = new Waypoint(item);
     const openedWaypoint = new EditWaypoint(item);
 
     waypointComponent.onClick = () => {
       openedWaypoint.render();
       eventContaiter.replaceChild(openedWaypoint.element, waypointComponent._element);
-      waypointComponent.destroy();
     };
 
-    openedWaypoint.onSubmit = (newObject) => {
-      const update = updateEvent(mockData, index, newObject);
-      waypointComponent.update(update);
-      waypointComponent.render();
-      eventContaiter.replaceChild(waypointComponent.element, openedWaypoint._element);
-      openedWaypoint.destroy();
-      updateData(getStatistics(mockData));
-    };
+    openedWaypoint.onSubmit = onSubmit;
 
     openedWaypoint.onDelete = () => {
-      deleteEvent(mockData, index);
+      deleteEvent(item.id);
       openedWaypoint.destroy();
-      updateData(getStatistics(mockData));
+      updateData(getStatistics(state.events));
     };
 
     waypointComponent.render();
-    eventContaiter.appendChild(waypointComponent.element);
+    fragment.appendChild(waypointComponent.element);
   });
 
-  updateData(getStatistics(data));
+  eventContaiter.innerHTML = ``;
+  eventContaiter.appendChild(fragment);
 };
 
-const filterEvents = (data, filterType) => {
+const filterEvents = (events, filterType) => {
   const currentDate = new Date();
   switch (filterType) {
     case `future`:
-      return data.filter((it) => it.date.from.getTime() > currentDate.getTime());
+      return events.filter((it) => it.date.from.getTime() > currentDate.getTime());
     case `past`:
-      return data.filter((it) => it.date.from.getTime() < currentDate.getTime());
+      return events.filter((it) => it.date.from.getTime() < currentDate.getTime());
     default:
-      return data;
+      return events;
   }
 };
 
-const renderFilters = (filtersData, data) => {
-  listOfFilter.innerHTML = ``;
+const renderFilters = (filtersData) => {
+  const fragment = document.createDocumentFragment();
+
   for (let item of filtersData) {
     const filter = new Filter(item);
     filter.render();
 
     filter.onFilter = (evt) => {
       eventContaiter.innerHTML = ``;
-      const events = filterEvents(data, evt.target.value);
-      renderEvents(events);
+      state.filter = evt.target.value;
+      const filtered = filterEvents(state.events, state.filter);
+      renderEvents(filtered);
+      updateData(getStatistics(filtered));
     };
 
-    listOfFilter.appendChild(filter.element);
+    fragment.appendChild(filter.element);
   }
+
+  listOfFilter.innerHTML = ``;
+  listOfFilter.appendChild(fragment);
 };
 
-renderFilters(filters, mockData);
-renderEvents(mockData);
+renderFilters(filters);
+renderEvents(state.events);
 onClickToggleModeView();

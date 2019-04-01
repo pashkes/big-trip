@@ -16,6 +16,13 @@ class Component {
     throw new Error(`You have to define template.`);
   }
 
+  get id() {
+    if (this._id === undefined) {
+      throw new Error(`You have to define template.`);
+    }
+    return this._id;
+  }
+
   render() {
     this._element = createElement(this.template);
     this.bind();
@@ -25,16 +32,12 @@ class Component {
   bind() {
   }
 
-  unBind() {
-
+  unbind() {
   }
 
   destroy() {
     this._element.remove();
     this._element = null;
-  }
-
-  update() {
   }
 
   get element() {

@@ -1,4 +1,4 @@
-const COUNT_EVENTS = 6;
+const COUNT_EVENTS = 16;
 const START_DATE = new Date(2018, 1, 1);
 const END_DATE = new Date(2020, 1, 1);
 const MAX_COST = 300;
@@ -26,25 +26,29 @@ const DESC = [
   `Sed sed nisi sed augue convallis suscipit in sed felis.`, `Aliquam erat volutpat. Nunc fermentum tortor ac porta dapibus. In rutrum ac purus sit amet tempus.`,
 ];
 const CITIES = [`Amsterdam`, `Geneva`, `Chamonix`, `London`, `Berlin`, `Vienna`, `Paris`, `Manchester`];
-const moneyCategories = new Map([
-  [`flight`, 0],
-  [`check-in`, 0],
-  [`Drive`, 0],
-  [`sight-seeing`, 0],
-  [`Restaurant`, 0],
-  [`taxi`, 0],
-  [`Ship`, 0],
-  [`train`, 0],
-  [`bus`, 0]
-]);
-const typesOfTransport = new Map([
-  [`Drive`, 0],
-  [`taxi`, 0],
-  [`flight`, 0],
-  [`Ship`, 0],
-  [`train`, 0],
-  [`bus`, 0],
-]);
+
+const STATISTICS = {
+  spentMoney: new Map([
+    [`flight`, 0],
+    [`check-in`, 0],
+    [`Drive`, 0],
+    [`sight-seeing`, 0],
+    [`Restaurant`, 0],
+    [`taxi`, 0],
+    [`Ship`, 0],
+    [`train`, 0],
+    [`bus`, 0],
+  ]),
+  wasUsed: new Map([
+    [`Drive`, 0],
+    [`taxi`, 0],
+    [`flight`, 0],
+    [`Ship`, 0],
+    [`train`, 0],
+    [`bus`, 0],
+  ]),
+};
+
 const filters = [
   {
     id: `filter-everything`,
@@ -98,11 +102,13 @@ const getRandomPhotos = (count) => {
   return photos;
 };
 
-const generateEvent = () => {
+// передаем ид события, в дальнейшем придет с сервера
+const generateEvent = (id) => {
   const keysOfEvent = Object.keys(TYPE_EVENTS);
   const startDate = getRandomDate(START_DATE, END_DATE);
   const endDate = getRandomDate(startDate, END_DATE);
   return {
+    id,
     type: keysOfEvent[Math.floor(Math.random() * keysOfEvent.length)],
     city: CITIES[Math.floor(Math.random() * CITIES.length)],
     date: {
@@ -120,9 +126,9 @@ const generateEvent = () => {
 const getMockData = () => {
   const events = [];
   for (let i = 0; i < COUNT_EVENTS; i++) {
-    events.push(generateEvent());
+    events.push(generateEvent(i));
   }
   return events;
 };
 
-export {getMockData, TYPE_EVENTS, filters, moneyCategories, typesOfTransport};
+export {getMockData, TYPE_EVENTS, filters, STATISTICS};
