@@ -58,7 +58,7 @@ const renderEvents = (data) => {
     };
 
     openedWaypoint.onSubmit = (newObject) => {
-      const update = updateEvent(data, index, newObject);
+      const update = updateEvent(mockData, index, newObject);
       waypointComponent.update(update);
       waypointComponent.render();
       eventContaiter.replaceChild(waypointComponent.element, openedWaypoint._element);
