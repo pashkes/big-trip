@@ -1,4 +1,3 @@
-
 const createElement = (template) => {
   const newElement = document.createElement(`div`);
   newElement.innerHTML = template;
@@ -12,19 +11,35 @@ class Component {
     }
     this._element = null;
   }
+
   get template() {
     throw new Error(`You have to define template.`);
   }
+
+  get id() {
+    if (this._id === undefined) {
+      throw new Error(`You have to define template.`);
+    }
+    return this._id;
+  }
+
   render() {
     this._element = createElement(this.template);
     this.bind();
     return this._element;
   }
-  bind() {}
+
+  bind() {
+  }
+
+  unbind() {
+  }
+
   destroy() {
+    this._element.remove();
     this._element = null;
   }
-  update() {}
+
   get element() {
     return this._element;
   }
