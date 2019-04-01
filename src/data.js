@@ -1,4 +1,4 @@
-const COUNT_EVENTS = 16;
+const COUNT_EVENTS = 6;
 const START_DATE = new Date(2018, 1, 1);
 const END_DATE = new Date(2020, 1, 1);
 const MAX_COST = 300;

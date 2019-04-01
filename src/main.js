@@ -8,9 +8,8 @@ import onClickToggleModeView from "./view-mode";
 const mockData = getMockData();
 const eventContaiter = document.querySelector(`.trip-day__items`);
 const listOfFilter = document.querySelector(`.trip-filter`);
-
 const getCountUsed = (data, statistics) => {
-  [...statistics.keys()].forEach((item) => statistics.set(item, 0));
+  statistics.forEach((item, key) => statistics.set(key, 0));
   for (let item of data) {
     if (statistics.has(item.type)) {
       statistics.set(item.type, statistics.get(item.type) + 1);
@@ -20,7 +19,7 @@ const getCountUsed = (data, statistics) => {
 };
 
 const getSpentMoney = (data, statistics) => {
-  [...statistics.keys()].forEach((item) => statistics.set(item, 0));
+  statistics.forEach((item, key) => statistics.set(key, 0));
   for (let item of data) {
     if (statistics.has(item.type)) {
       statistics.set(item.type, statistics.get(item.type) + item.price);
@@ -64,14 +63,13 @@ const renderEvents = (data) => {
       waypointComponent.render();
       eventContaiter.replaceChild(waypointComponent.element, openedWaypoint._element);
       openedWaypoint.destroy();
-      updateData(getStatistics(data));
+      updateData(getStatistics(mockData));
     };
 
     openedWaypoint.onDelete = () => {
-      deleteEvent(data, index);
-      updateData(getStatistics(data));
+      deleteEvent(mockData, index);
       openedWaypoint.destroy();
-      updateData(getStatistics(data));
+      updateData(getStatistics(mockData));
     };
 
     waypointComponent.render();
