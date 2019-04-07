@@ -2,15 +2,14 @@ import Filter from "./filter";
 import Waypoint from "./waypoint";
 import EditWaypoint from "./edit-waypoint";
 import updateData from "./statistics";
-import {getMockData, filters, STATISTICS} from "./data";
+import {getMockData, filters, STATISTICS, getDestionations} from "./data";
 import onClickToggleModeView from "./view-mode";
 
 const eventContaiter = document.querySelector(`.trip-day__items`);
 const listOfFilter = document.querySelector(`.trip-filter`);
-
 const state = {
   events: getMockData(),
-  filter: `everything`
+  filter: `everything`,
 };
 
 const getStatistics = (events) => {
@@ -52,7 +51,7 @@ const renderEvents = (events) => {
 
   events.forEach((item) => {
     const waypointComponent = new Waypoint(item);
-    const openedWaypoint = new EditWaypoint(item);
+    const openedWaypoint = new EditWaypoint(item, getDestionations);
 
     waypointComponent.onClick = () => {
       openedWaypoint.render();
@@ -93,7 +92,6 @@ const renderFilters = (filtersData) => {
   for (let item of filtersData) {
     const filter = new Filter(item);
     filter.render();
-
     filter.onFilter = (evt) => {
       eventContaiter.innerHTML = ``;
       state.filter = evt.target.value;

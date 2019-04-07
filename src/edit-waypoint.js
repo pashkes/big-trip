@@ -3,7 +3,7 @@ import Component from "./component";
 import flatpickr from "flatpickr";
 
 class EditWaypoint extends Component {
-  constructor(data) {
+  constructor(data, destinations) {
     super();
     this._id = data.id;
     this._type = data.type;
@@ -14,6 +14,7 @@ class EditWaypoint extends Component {
     this._photos = data.photos;
     // this._offers = data.offers;
     this._description = data.description;
+    this._destinations = destinations;
     this._onSubmitButtonClick = this._onSubmitButtonClick.bind(this);
     this._onSubmit = null;
     this._onDelete = this._onDeleteButtonClick.bind(this);
@@ -66,16 +67,14 @@ class EditWaypoint extends Component {
               <label class="point__destination-label" for="destination">Flight to</label>
               <input class="point__destination-input" list="destination-select" id="destination" value=${this._city} name="destination">
               <datalist id="destination-select">
-                <option value="airport"></option>
-                <option value="Geneva"></option>
-                <option value=${this._city}></option>
-                <option value="hotel"></option>
+              ${this._destinations.then((items) => items.map((item) => `<option value="${item.name}">`))}
               </datalist>
             </div>
 
             <label class="point__time">
               choose time
-              <input class="point__input range-time" type="text" value="" name="time" placeholder="00:00 — 00:00">
+              <input class="point__input" type="text" value="19:00" name="date-start" placeholder="19:00">
+              <input class="point__input" type="text" value="21:00" name="date-end" placeholder="21:00">
             </label>
 
             <label class="point__price">
@@ -157,18 +156,29 @@ class EditWaypoint extends Component {
   }
 
   _initDatePicked() {
-    flatpickr(this._element.querySelector(`.range-time`), {
-      'mode': `range`,
+    const formElements = this._element.querySelector(`form`).elements;
+    const startDate = formElements[`date-start`];
+    const endDate = formElements[`date-end`];
+    const self = this;
+    flatpickr(startDate, {
       'enableTime': true,
       'dateFormat': `H:i`,
-      'defaultDate': [this._timeFrom, this._timeTo],
+      'defaultDate': this._timeFrom,
       'minDate': `today`,
       'time_24hr': true,
-      'appendTo': this._element,
-      onChange(selectedDates) {
-        this._timeFrom = selectedDates[0];
-        this._timeTo = selectedDates[1];
+      onClose(selectedDates) {
+        self._timeFrom = selectedDates[0];
       },
+    });
+    flatpickr(endDate, {
+      'enableTime': true,
+      'dateFormat': `H:i`,
+      'defaultDate': this._timeTo,
+      'minDate': `today`,
+      'time_24hr': true,
+      onClose(selectedDates) {
+        self._timeTo = selectedDates[0];
+      }
     });
   }
 
@@ -197,8 +207,7 @@ class EditWaypoint extends Component {
       photos: this._photos,
     };
     const editMapper = EditWaypoint.createMapper(entry);
-    for (let item of formData.entries()) {
-      const [property, value] = item;
+    for (let [property, value] of formData.entries()) {
       if (editMapper[property]) {
         editMapper[property](value);
       }
@@ -219,7 +228,7 @@ class EditWaypoint extends Component {
       },
       'offer': (value) => {
         target.offers.add(value);
-      },
+      }
     };
 
   }

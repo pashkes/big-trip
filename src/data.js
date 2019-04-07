@@ -1,3 +1,9 @@
+import API from "./api";
+
+const AUTHORIZATION = `Basic dXNlckBwYXNzd29yZAo=${Math.random()}`;
+const END_POINT = `https://es8-demo-srv.appspot.com/big-trip/`;
+const api = new API({endPoint: END_POINT, authorization: AUTHORIZATION});
+
 const COUNT_EVENTS = 16;
 const START_DATE = new Date(2018, 1, 1);
 const END_DATE = new Date(2020, 1, 1);
@@ -70,6 +76,8 @@ const filters = [
   },
 ];
 
+const getDestionations = api.getDestination();
+
 const getRandomInt = (max = 1, min = 0) => {
   min = Math.ceil(min);
   max = Math.floor(max);
@@ -131,4 +139,4 @@ const getMockData = () => {
   return events;
 };
 
-export {getMockData, TYPE_EVENTS, filters, STATISTICS};
+export {getMockData, TYPE_EVENTS, filters, STATISTICS, getDestionations};
