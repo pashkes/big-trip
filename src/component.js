@@ -1,8 +1,4 @@
-const createElement = (template) => {
-  const newElement = document.createElement(`div`);
-  newElement.innerHTML = template;
-  return newElement.firstChild;
-};
+import {createElement} from "./util";
 
 class Component {
   constructor() {
@@ -37,6 +33,7 @@ class Component {
 
   destroy() {
     this._element.remove();
+    this.unbind();
     this._element = null;
   }
 

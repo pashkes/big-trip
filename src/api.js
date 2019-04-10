@@ -1,3 +1,5 @@
+import ModelEvent from "./model-event";
+
 const Method = {
   GET: `GET`,
   POST: `POST`,
@@ -23,9 +25,15 @@ class API {
     this._authorization = authorization;
   }
 
+  getOffers() {
+    return this._load({url: `offers`})
+      .then(toJSON);
+  }
+
   getPoints() {
     return this._load({url: `points`})
-      .then(toJSON);
+      .then(toJSON)
+      .then(ModelEvent.parseEvents);
   }
 
   getDestination() {
@@ -34,12 +42,29 @@ class API {
   }
 
   createEvent({event}) {
+    return this._load({
+      url: `tasks`,
+      method: Method.POST,
+      body: JSON.stringify(event),
+      headers: new Headers({'Content-Type': `application/json`})
+    })
+      .then(toJSON)
+      .then(ModelEvent.parseEvents);
   }
 
   updateEvent({id, data}) {
+    return this._load({
+      url: `points/${id}`,
+      method: Method.PUT,
+      body: JSON.stringify(data),
+      headers: new Headers({'Content-Type': `application/json`})
+    })
+      .then(toJSON)
+      .then(ModelEvent.parseEvents);
   }
 
   deleteEvent({id}) {
+    return this._load({url: `tasks/${id}`, method: Method.DELETE});
   }
 
   _load({url, method = Method.GET, body = null, headers = new Headers()}) {
