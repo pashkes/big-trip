@@ -6,8 +6,8 @@ import {filters, STATISTICS, TYPE_EVENTS} from "./data";
 import onClickToggleModeView from "./view-mode";
 import API from "./api";
 import {createElement} from "./util";
-import ModelEvent from "./model-event";
-const AUTHORIZATION = `Basic dXNlckBwYXNzd29yZAo=${Math.random()}`;
+
+const AUTHORIZATION = `Basic dXNlckBwYXNzd29yZAo=14`;
 const END_POINT = `https://es8-demo-srv.appspot.com/big-trip/`;
 
 const api = new API({endPoint: END_POINT, authorization: AUTHORIZATION});
@@ -17,11 +17,11 @@ const offers = new Map();
 const citiesList = new Map();
 const eventContaiter = document.querySelector(`.trip-day__items`);
 const listOfFilter = document.querySelector(`.trip-filter`);
+const animationDurationMC = 800;
 const state = {
   events: null,
   filter: `everything`,
 };
-
 destinations.then((cities) => {
   cities.forEach((city) => {
     citiesList.set(city.name, {description: city.description, pictures: [...city.pictures]});
@@ -58,14 +58,59 @@ const deleteEvent = (id) => {
   updateData(getStatistics(filtered));
 };
 
-const onSubmit = (newObject, element) => {
-  const filtered = filterEvents(state.events, state.filter);
-  api.updateEvent({id: element.id, data: newObject}).then((newEvent) => {
+// Хотел изначально добавить это в виде метода для класса ModelEvent
+// но появляется ошибка которую я не могу исправить
+const toRAW = (data) => {
+  const listOfOffers = [];
+  data.offers.forEach((item, key) => {
+    listOfOffers.push({
+      title: key,
+      price: item.price,
+      accepted: item.isChecked,
+    });
+  });
+  return {
+    'id': data.id,
+    'type': data.type,
+    'date_from': data.dateFrom.getTime(),
+    'date_to': data.dateTo.getTime(),
+    'base_price': data.price,
+    'offers': listOfOffers,
+    'destination': {
+      'name': data.city,
+      'pictures': data.photos,
+      'description': data.description,
+    },
+    'is_favorite': data.isFavorite ? `true` : `false`,
+  };
+};
+
+const onSubmit = (newObject, event) => {
+  // Тут и в сеттере onDelete есть одинаковый код который нужно было бы куда-то
+  // отдельно вынести поидее
+  const submitBtn = event.element.querySelector(`.point__button--save`);
+  const deleteBtn = event.element.querySelector(`.point__button--delete`);
+  submitBtn.disabled = true;
+  deleteBtn.disabled = true;
+  submitBtn.textContent = `Saving...`;
+  api.updateEvent({id: event.id, data: toRAW(newObject)}).then((newEvent) => {
+    const filtered = filterEvents(state.events, state.filter);
     updateEvent(newEvent);
     renderEvents(filtered);
     updateData(getStatistics(filtered));
-    element.destroy();
-  });
+    event.destroy();
+  })
+    .catch(() => {
+      event.element.classList.add(`jello`);
+      event.element.classList.add(`error`);
+      submitBtn.textContent = `Save`;
+      submitBtn.disabled = false;
+      deleteBtn.disabled = false;
+      setTimeout(() => {
+        event.element.classList.remove(`jello`);
+        event.element.classList.remove(`error`);
+      }, animationDurationMC);
+    });
 };
 
 const createImage = (src, alt, className) => {
@@ -95,11 +140,10 @@ const renderEvents = (events) => {
         openedWaypoint._offers = new Map();
         return;
       }
-
       const selectedWay = openedWaypoint.element.querySelector(`.travel-way__label`);
-      selectedWay.textContent = TYPE_EVENTS[evt.target.value];
       const targetType = offers.get(evt.target.value);
       const fragmentForOffers = document.createDocumentFragment();
+      selectedWay.textContent = TYPE_EVENTS[evt.target.value];
       targetType.forEach((offer) => {
         const offerTemplate = openedWaypoint.offerTemplate(offer.name, offer.price);
         fragmentForOffers.appendChild(createElement(offerTemplate));
@@ -147,9 +191,29 @@ const renderEvents = (events) => {
     openedWaypoint.onSubmit = onSubmit;
 
     openedWaypoint.onDelete = () => {
-      deleteEvent(item.id);
-      openedWaypoint.destroy();
-      updateData(getStatistics(state.events));
+      const submitBtn = openedWaypoint.element.querySelector(`.point__button--save`);
+      const deleteBtn = openedWaypoint.element.querySelector(`.point__button--delete`);
+      submitBtn.disabled = true;
+      deleteBtn.disabled = true;
+      deleteBtn.textContent = `Deleting...`;
+      api.deleteEvent({id: item.id})
+        .then(() => api.getOffers())
+        .then(() => {
+          deleteEvent(item.id);
+          openedWaypoint.destroy();
+          updateData(getStatistics(state.events));
+        })
+        .catch(() => {
+          openedWaypoint.element.classList.add(`jello`);
+          openedWaypoint.element.classList.add(`error`);
+          deleteBtn.textContent = `Delete`;
+          submitBtn.disabled = false;
+          deleteBtn.disabled = false;
+          setTimeout(() => {
+            openedWaypoint.element.classList.remove(`jello`);
+            openedWaypoint.element.classList.remove(`error`);
+          }, animationDurationMC);
+        });
     };
 
     waypointComponent.render();
@@ -194,9 +258,13 @@ const renderFilters = (filtersData) => {
 };
 
 renderFilters(filters);
+eventContaiter.innerHTML = `Loading route...`;
 api.getPoints()
   .then((events) => {
     renderEvents(events);
     state.events = events;
+  })
+  .catch(() => {
+    eventContaiter.innerHTML = `Something went wrong while loading your route info. Check your connection or try again later`;
   });
 onClickToggleModeView();

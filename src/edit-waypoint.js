@@ -34,7 +34,7 @@ class EditWaypoint extends Component {
       return result.join(``);
     };
     return `
-      <article class="point">
+      <article class="point animated fast">
         <form action="" method="get">
           <header class="point__header">
             <label class="point__date">
@@ -94,7 +94,7 @@ class EditWaypoint extends Component {
 
             <div class="point__buttons">
               <button class="point__button point__button--save" type="submit">Save</button>
-              <button class="point__button" type="reset">Delete</button>
+              <button class="point__button point__button--delete" type="reset">Delete</button>
             </div>
 
             <div class="paint__favorite-wrap">
@@ -219,7 +219,7 @@ class EditWaypoint extends Component {
       offers: this._offers,
       description: this._description,
       photos: this._photos,
-      isFavorite: false
+      isFavorite: false,
     };
     const editMapper = EditWaypoint.createMapper(entry);
     for (let [property, value] of formData.entries()) {
@@ -284,7 +284,7 @@ class EditWaypoint extends Component {
       },
       'favorite': (value) => {
         target.isFavorite = !!value;
-      }
+      },
     };
   }
 }

@@ -19,29 +19,6 @@ class ModelEvent {
     });
   }
 
-  toRAW() {
-    const offers = {};
-    this.offers.forEach((item, key) => {
-      offers.title = key;
-      offers.price = item.price;
-      offers.accepted = item.isChecked;
-    });
-    return {
-      'id': this.id,
-      'type': this.type,
-      'date_from': this.dateFrom.getTime(),
-      'date_to': this.dateTo.getTime(),
-      'base_price': this.price,
-      'offers': offers,
-      'destination': {
-        'name': this.city,
-        'pictures': this.photos,
-        'description': this.description
-      },
-      'is_favorite': this.isFavorite ? `true` : `false`
-    };
-  }
-
   static parseEvent(data) {
     return new ModelEvent(data);
   }

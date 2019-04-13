@@ -40,7 +40,7 @@ class API {
     return this._load({url: `destinations`})
       .then(toJSON);
   }
-
+  // пока еще не используется
   createEvent({event}) {
     return this._load({
       url: `tasks`,
@@ -59,13 +59,12 @@ class API {
       body: JSON.stringify(data),
       headers: new Headers({'Content-Type': `application/json`})
     })
-      .then(ModelEvent.toRAW)
       .then(toJSON)
-      .then(ModelEvent.parseEvents);
+      .then(ModelEvent.parseEvent);
   }
 
   deleteEvent({id}) {
-    return this._load({url: `tasks/${id}`, method: Method.DELETE});
+    return this._load({url: `points/${id}`, method: Method.DELETE});
   }
 
   _load({url, method = Method.GET, body = null, headers = new Headers()}) {
