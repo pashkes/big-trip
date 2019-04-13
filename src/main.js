@@ -6,7 +6,7 @@ import {filters, STATISTICS, TYPE_EVENTS} from "./data";
 import onClickToggleModeView from "./view-mode";
 import API from "./api";
 import {createElement} from "./util";
-
+import ModelEvent from "./model-event";
 const AUTHORIZATION = `Basic dXNlckBwYXNzd29yZAo=${Math.random()}`;
 const END_POINT = `https://es8-demo-srv.appspot.com/big-trip/`;
 
@@ -26,7 +26,6 @@ destinations.then((cities) => {
   cities.forEach((city) => {
     citiesList.set(city.name, {description: city.description, pictures: [...city.pictures]});
   });
-  console.log(citiesList);
 });
 
 getOffers.then((list) => list.forEach((item) => {
@@ -61,10 +60,12 @@ const deleteEvent = (id) => {
 
 const onSubmit = (newObject, element) => {
   const filtered = filterEvents(state.events, state.filter);
-  updateEvent(newObject);
-  renderEvents(filtered);
-  updateData(getStatistics(filtered));
-  element.destroy();
+  api.updateEvent({id: element.id, data: newObject}).then((newEvent) => {
+    updateEvent(newEvent);
+    renderEvents(filtered);
+    updateData(getStatistics(filtered));
+    element.destroy();
+  });
 };
 
 const createImage = (src, alt, className) => {
@@ -91,6 +92,7 @@ const renderEvents = (events) => {
       const offfers = openedWaypoint.element.querySelector(`.point__offers-wrap`);
       if (!offers.has(evt.target.value)) {
         offfers.innerHTML = ``;
+        openedWaypoint._offers = new Map();
         return;
       }
 
@@ -101,6 +103,10 @@ const renderEvents = (events) => {
       targetType.forEach((offer) => {
         const offerTemplate = openedWaypoint.offerTemplate(offer.name, offer.price);
         fragmentForOffers.appendChild(createElement(offerTemplate));
+      });
+      openedWaypoint._offers.clear();
+      targetType.forEach((offer) => {
+        openedWaypoint._offers.set(offer.name, {price: offer.price, isChecked: false});
       });
       offfers.innerHTML = ``;
       offfers.appendChild(fragmentForOffers);
@@ -122,11 +128,15 @@ const renderEvents = (events) => {
         pictures.innerHTML = ``;
         pictures.textContent = `no photos`;
         description.textContent = `no description`;
+        openedWaypoint._description = ``;
+        openedWaypoint._photos = [];
         return;
       }
       const targetCity = citiesList.get(evt.target.value);
       const fragmentForPhotos = document.createDocumentFragment();
       description.textContent = targetCity.description;
+      openedWaypoint._description = targetCity.description;
+      openedWaypoint._photos = targetCity.pictures;
       targetCity.pictures.forEach((picture) => {
         fragmentForPhotos.appendChild(createImage(picture.src, picture.alt, `point__destination-image`));
       });

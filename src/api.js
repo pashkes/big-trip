@@ -59,6 +59,7 @@ class API {
       body: JSON.stringify(data),
       headers: new Headers({'Content-Type': `application/json`})
     })
+      .then(ModelEvent.toRAW)
       .then(toJSON)
       .then(ModelEvent.parseEvents);
   }

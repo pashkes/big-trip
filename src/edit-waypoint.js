@@ -12,9 +12,9 @@ class EditWaypoint extends Component {
     this._timeTo = data.dateTo;
     this._price = data.price;
     this._offers = data.offers;
-    this._nameOffers = new Set();
     this._photos = data.photos;
     this._description = data.description;
+    this._isFavorite = data.isFavorite;
     this._onChangeType = this._onChangeRadioType.bind(this);
     this._onSearch = this._onFocusInputSearch.bind(this);
     this._onChangeCity = this._onChangeInputCity.bind(this);
@@ -27,9 +27,11 @@ class EditWaypoint extends Component {
 
   get template() {
     const getOffers = () => {
-      return this._offers.map((item) => {
-        return this.offerTemplate(item.name, item.price, item.isChecked);
-      }).join(``);
+      const result = [];
+      this._offers.forEach((item, key) => {
+        result.push(this.offerTemplate(key, item.price, item.isChecked));
+      });
+      return result.join(``);
     };
     return `
       <article class="point">
@@ -96,7 +98,7 @@ class EditWaypoint extends Component {
             </div>
 
             <div class="paint__favorite-wrap">
-              <input type="checkbox" class="point__favorite-input visually-hidden" id="favorite" name="favorite">
+              <input type="checkbox" class="point__favorite-input visually-hidden" id="favorite" name="favorite" ${this._isFavorite ? `checked` : ``}>
               <label class="point__favorite" for="favorite">favorite</label>
             </div>
           </header>
@@ -205,6 +207,9 @@ class EditWaypoint extends Component {
   }
 
   _processForm(formData) {
+    this._offers.forEach((item) => {
+      item.isChecked = false;
+    });
     const entry = {
       type: ``,
       city: ``,
@@ -214,6 +219,7 @@ class EditWaypoint extends Component {
       offers: this._offers,
       description: this._description,
       photos: this._photos,
+      isFavorite: false
     };
     const editMapper = EditWaypoint.createMapper(entry);
     for (let [property, value] of formData.entries()) {
@@ -273,6 +279,12 @@ class EditWaypoint extends Component {
       'price': (value) => {
         target.price = +value;
       },
+      'offer': (value) => {
+        target.offers.set(value, {isChecked: true, price: (target.offers.get(value)).price});
+      },
+      'favorite': (value) => {
+        target.isFavorite = !!value;
+      }
     };
   }
 }

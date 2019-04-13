@@ -13,7 +13,7 @@ class Waypoint extends Component {
     this._dateTo = data.dateTo;
     this._duration = null;
     this._price = data.price;
-    this._offers = data.offers.filter((offer) => offer.isChecked === true).map((item) => item.name);
+    this._offers = data.offers;
     this._city = data.city;
     this._onClick = null;
   }
@@ -22,6 +22,12 @@ class Waypoint extends Component {
     const startDate = moment(this._dateFrom);
     const endDate = moment(this._dateTo);
     this._duration = moment.duration(endDate.diff(startDate)).format(`h[H] m[M]`);
+    const filteredOffers = [];
+    this._offers.forEach((item, key) => {
+      if (item.isChecked) {
+        filteredOffers.push(key);
+      }
+    });
     return `<article class="trip-point">
           <i class="trip-icon">${TYPE_EVENTS[this._type]}</i>
           <h3 class="trip-point__title">Flight to ${this._city}</h3>
@@ -31,7 +37,7 @@ class Waypoint extends Component {
           </p>
           <p class="trip-point__price">&euro;&nbsp;${this._price ? this._price : 0}</p>
           <ul class="trip-point__offers">
-          ${this._offers.map((offer) => `<li><button class="trip-point__offer">${offer}</button></li>`).join(``)}
+          ${filteredOffers.map((offer) => `<li><button class="trip-point__offer">${offer}</button></li>`).join(``)}
           </ul>
         </article>`.trim();
   }
