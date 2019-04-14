@@ -44,7 +44,6 @@ class EditWaypoint extends Component {
 
             <div class="travel-way">
               <label class="travel-way__label" for="travel-way__toggle">${TYPE_EVENTS[this._type]}</label>
-
               <input type="checkbox" class="travel-way__toggle visually-hidden" id="travel-way__toggle">
 
               <div class="travel-way__select">
@@ -60,6 +59,7 @@ class EditWaypoint extends Component {
 
                   <input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-flight" name="travel-way" value="flight">
                   <label class="travel-way__select-label" for="travel-way-flight">✈️ flight</label>
+                  
                   <input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-ship" name="travel-way" value="ship">
                   <label class="travel-way__select-label" for="travel-way-ship">🛳️ ship</label>
                 </div>
@@ -67,7 +67,7 @@ class EditWaypoint extends Component {
                 <div class="travel-way__select-group">
                   <input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-check-in" name="travel-way" value="check-in">
                   <label class="travel-way__select-label" for="travel-way-check-in">🏨 check-in</label>
-
+                  
                   <input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-sightseeing" name="travel-way" value="sightseeing">
                   <label class="travel-way__select-label" for="travel-way-sightseeing">🏛 sightseeing</label>
                 </div>

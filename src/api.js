@@ -43,7 +43,7 @@ class API {
   // пока еще не используется
   createEvent({event}) {
     return this._load({
-      url: `tasks`,
+      url: `points`,
       method: Method.POST,
       body: JSON.stringify(event),
       headers: new Headers({'Content-Type': `application/json`})
