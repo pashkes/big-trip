@@ -33,6 +33,7 @@ class EditWaypoint extends Component {
       });
       return result.join(``);
     };
+    console.log(typeof this._isFavorite);
     return `
       <article class="point animated fast">
         <form action="" method="get">
