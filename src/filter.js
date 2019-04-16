@@ -28,7 +28,7 @@ class Filter extends Component {
     this._element.addEventListener(`change`, this._onFilter);
   }
 
-  unBind() {
+  unbind() {
     this._element.removeEventListener(`change`, this._onFilter);
   }
 }

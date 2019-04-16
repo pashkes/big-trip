@@ -4,8 +4,8 @@ const onClickToggleModeView = () => {
   viewMode.forEach((item) => {
     item.addEventListener(`click`, (evt) => {
       const target = evt.target;
+      evt.preventDefault();
       if (target.closest(`.view-switch__item--active`)) {
-        evt.preventDefault();
         return;
       }
       const previousModeLink = document.querySelector(`.view-switch__item--active`);
