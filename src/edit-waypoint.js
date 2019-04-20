@@ -6,23 +6,31 @@ class EditWaypoint extends Component {
   constructor(data) {
     super();
     this._id = data.id;
-    this._type = data.type;
-    this._city = data.city;
-    this._timeFrom = data.dateFrom;
-    this._timeTo = data.dateTo;
-    this._price = data.price;
-    this._offers = data.offers;
-    this._photos = data.photos;
-    this._description = data.description;
-    this._isFavorite = data.isFavorite;
-    this._onChangeType = this._onChangeRadioType.bind(this);
-    this._onSearch = this._onFocusInputSearch.bind(this);
-    this._onChangeCity = this._onChangeInputCity.bind(this);
+    this._type = data.type || `flight`;
+    this._city = data.city || ``;
+    this._timeFrom = data.dateFrom || new Date();
+    this._timeTo = data.dateTo || new Date();
+    this._price = data.price || 0;
+    this._offers = data.offers || new Map();
+    this._photos = data.photos | [];
+    this._description = data.description || `no any description`;
+    this._isFavorite = data.isFavorite || false;
+    this._onChangeType = null;
+    this._onChangeRadioType = this._onChangeRadioType.bind(this);
+    this._onChangeOffers = null;
+    this._onChangeCheckboxOffers = this._onChangeCheckboxOffers.bind(this);
+    this._onSearch = null;
+    this._onFocusInputSearch = this._onFocusInputSearch.bind(this);
+    this._onChangeCity = null;
+    this._onChangeInputCity = this._onChangeInputCity.bind(this);
+    this._onKeyDown = null;
+    this._onKeyDownEsc = this._onKeyDownEsc.bind(this);
     this._initDatePickerStartDate = null;
     this._initDatePickerEndDate = null;
     this._onSubmit = null;
     this._onSubmitButtonClick = this._onSubmitButtonClick.bind(this);
-    this._onDelete = this._onDeleteButtonClick.bind(this);
+    this._onDelete = null;
+    this._onDeleteButtonClick = this._onDeleteButtonClick.bind(this);
   }
 
   get template() {
@@ -43,7 +51,7 @@ class EditWaypoint extends Component {
             </label>
 
             <div class="travel-way">
-              <label class="travel-way__label" for="travel-way__toggle">${TYPE_EVENTS[this._type]}</label>
+              <label class="travel-way__label" for="travel-way__toggle">${TYPE_EVENTS[this._type].icon}</label>
               <input type="checkbox" class="travel-way__toggle visually-hidden" id="travel-way__toggle">
 
               <div class="travel-way__select">
@@ -60,6 +68,11 @@ class EditWaypoint extends Component {
                   <input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-flight" name="travel-way" value="flight" ${this._type === `flight` ? `checked` : ``}>
                   <label class="travel-way__select-label" for="travel-way-flight">✈️ flight</label>
                   
+                  <input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-transport" name="travel-way" value="transport" ${this._type === `transport` ? `checked` : ``}>
+                  <label class="travel-way__select-label" for="travel-way-transport">🚊 transport</label>
+                  <input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-drive" name="travel-way" value="drive" ${this._type === `drive` ? `checked` : ``}>
+                  <label class="travel-way__select-label" for="travel-way-drive">🚗 drive</label>
+                  
                   <input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-ship" name="travel-way" value="ship" ${this._type === `ship` ? `checked` : ``}>
                   <label class="travel-way__select-label" for="travel-way-ship">🛳️ ship</label>
                 </div>
@@ -69,12 +82,14 @@ class EditWaypoint extends Component {
                   
                   <input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-sightseeing" name="travel-way" value="sightseeing" ${this._type === `sightseeing` ? `checked` : ``}>
                   <label class="travel-way__select-label" for="travel-way-sightseeing">🏛 sightseeing</label>
+                  <input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-restaurant" name="travel-way" value="restaurant" ${this._type === `restaurant` ? `checked` : ``}>
+                  <label class="travel-way__select-label" for="travel-way-restaurant">🍴 restaurant</label>
                 </div>
               </div>
             </div>
 
             <div class="point__destination-wrap">
-              <label class="point__destination-label" for="destination">Flight to</label>
+              <label class="point__destination-label" for="destination">${this._type} ${TYPE_EVENTS[this._type].add}</label>
               <input class="point__destination-input" list="destination-select" id="destination" value="${this._city ? this._city : ``}" name="destination">
               <datalist id="destination-select"></datalist>
             </div>
@@ -133,25 +148,39 @@ class EditWaypoint extends Component {
             </div>`.trim();
   }
 
-  _onChangeRadioType() {
+  _onChangeRadioType(evt) {
     if (typeof this._onChangeType !== `function`) {
       return;
     }
-    this._onChangeType();
+    this._onChangeType(this, evt);
   }
 
-  _onChangeInputCity() {
+  _onChangeCheckboxOffers(evt) {
+    if (typeof this._onChangeOffers !== `function`) {
+      return;
+    }
+    this._onChangeOffers(this, evt);
+  }
+
+  _onChangeInputCity(evt) {
     if (typeof this._onChangeCity !== `function`) {
       return;
     }
-    this._onChangeCity();
+    this._onChangeCity(this, evt);
   }
 
-  _onFocusInputSearch() {
+  _onFocusInputSearch(evt) {
     if (typeof this._onSearch !== `function`) {
       return;
     }
-    this._onSearch();
+    this._onSearch(this, evt);
+  }
+
+  _onKeyDownEsc(evt) {
+    if (typeof this._onKeyDown !== `function`) {
+      return;
+    }
+    this._onKeyDown(this, evt);
   }
 
   _initDatePickers() {
@@ -164,7 +193,6 @@ class EditWaypoint extends Component {
       'dateFormat': `H:i`,
       'defaultDate': this._timeFrom,
       'time_24hr': true,
-      'noCalendar': true,
       onClose(selectedDates) {
         self._timeFrom = selectedDates[0];
       },
@@ -174,7 +202,6 @@ class EditWaypoint extends Component {
       'dateFormat': `H:i`,
       'defaultDate': this._timeTo,
       'time_24hr': true,
-      'noCalendar': true,
       onClose(selectedDates) {
         self._timeTo = selectedDates[0];
       },
@@ -194,7 +221,7 @@ class EditWaypoint extends Component {
     const formData = new FormData(this._element.querySelector(`form`));
     const updatedEvent = this._processForm(formData);
     updatedEvent.id = this._id;
-    this._onSubmit(updatedEvent, this);
+    this._onSubmit(updatedEvent, this, evt);
   }
 
   _onDeleteButtonClick(evt) {
@@ -202,7 +229,7 @@ class EditWaypoint extends Component {
       return;
     }
     evt.preventDefault();
-    this._onDelete();
+    this._onDelete(this, this._id);
   }
 
   _processForm(formData) {
@@ -230,20 +257,24 @@ class EditWaypoint extends Component {
   }
 
   bind() {
-    this._element.querySelector(`.travel-way__select`).addEventListener(`change`, this._onChangeType);
-    this._element.querySelector(`.point__destination-input`).addEventListener(`focus`, this._onSearch);
-    this._element.querySelector(`.point__destination-input`).addEventListener(`change`, this._onChangeCity);
+    this._element.querySelector(`.travel-way__select`).addEventListener(`change`, this._onChangeRadioType);
+    this._element.querySelector(`.point__destination-input`).addEventListener(`focus`, this._onFocusInputSearch);
+    this._element.querySelector(`.point__destination-input`).addEventListener(`change`, this._onChangeInputCity);
+    this._element.querySelector(`.point__offers-wrap`).addEventListener(`change`, this._onChangeCheckboxOffers);
     this._element.addEventListener(`submit`, this._onSubmitButtonClick);
-    this._element.addEventListener(`reset`, this._onDelete);
+    this._element.addEventListener(`reset`, this._onDeleteButtonClick);
+    document.addEventListener(`keydown`, this._onKeyDownEsc);
     this._initDatePickers();
   }
 
   unbind() {
+    this._element.querySelector(`.travel-way__select`).removeEventListener(`change`, this._onChangeRadioType);
+    this._element.querySelector(`.point__destination-input`).removeEventListener(`focus`, this._onFocusInputSearch);
+    this._element.querySelector(`.point__destination-input`).removeEventListener(`change`, this._onChangeInputCity);
+    this._element.querySelector(`.point__offers-wrap`).removeEventListener(`change`, this._onChangeCheckboxOffers);
     this._element.removeEventListener(`submit`, this._onSubmitButtonClick);
-    this._element.removeEventListener(`reset`, this._onDelete);
-    this._element.querySelector(`.travel-way__select`).removeEventListener(`change`, this._onChangeType);
-    this._element.querySelector(`.point__destination-input`).removeEventListener(`focus`, this._onSearch);
-    this._element.querySelector(`.point__destination-input`).removeEventListener(`change`, this._onChangeCity);
+    this._element.removeEventListener(`reset`, this._onDeleteButtonClick);
+    document.removeEventListener(`keydown`, this._onKeyDownEsc);
     this._destroyDatePickers();
   }
 
@@ -265,6 +296,14 @@ class EditWaypoint extends Component {
 
   set onDelete(fn) {
     this._onDelete = fn;
+  }
+
+  set onKeyDownEscExit(fn) {
+    this._onKeyDown = fn;
+  }
+
+  set onChangeOffers(fn) {
+    this._onChangeOffers = fn;
   }
 
   static createMapper(target) {

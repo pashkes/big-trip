@@ -9,7 +9,7 @@ class ModelEvent {
     this.city = data[`destination`][`name`];
     this.photos = data[`destination`].pictures || [];
     this.description = data.destination.description;
-    this.isFavorite = data[`is_favorite`] === `true` ? true : false;
+    this.isFavorite = !!data[`is_favorite`];
 
     data[`offers`].forEach((item) => {
       this.offers.set(item[`title`], {

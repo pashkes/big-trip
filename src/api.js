@@ -40,16 +40,16 @@ class API {
     return this._load({url: `destinations`})
       .then(toJSON);
   }
-  // пока еще не используется
-  createEvent({event}) {
+
+  createEvent(event) {
     return this._load({
       url: `points`,
       method: Method.POST,
       body: JSON.stringify(event),
-      headers: new Headers({'Content-Type': `application/json`})
+      headers: new Headers({'Content-Type': `application/json`}),
     })
       .then(toJSON)
-      .then(ModelEvent.parseEvents);
+      .then(ModelEvent.parseEvent);
   }
 
   updateEvent({id, data}) {
@@ -57,7 +57,7 @@ class API {
       url: `points/${id}`,
       method: Method.PUT,
       body: JSON.stringify(data),
-      headers: new Headers({'Content-Type': `application/json`})
+      headers: new Headers({'Content-Type': `application/json`}),
     })
       .then(toJSON)
       .then(ModelEvent.parseEvent);

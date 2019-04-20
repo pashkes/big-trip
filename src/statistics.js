@@ -9,8 +9,7 @@ const timeSpendCtx = document.querySelector(`.statistic__time-spend`);
 const BAR_HEIGHT = 55;
 moneyCtx.height = BAR_HEIGHT * 9;
 transportCtx.height = BAR_HEIGHT * 6;
-timeSpendCtx.height = BAR_HEIGHT * 4;
-
+timeSpendCtx.height = BAR_HEIGHT * 9;
 const updateData = (data) => {
   moneyChart.data.datasets.forEach((it) => {
     it.data = [...data.spentMoney.values()];
@@ -18,17 +17,21 @@ const updateData = (data) => {
   transportChart.data.datasets.forEach((it) => {
     it.data = [...data.wasUsed.values()];
   });
+  timeSpendChart.data.datasets.forEach((it) => {
+    it.data = [...data.spentTime.values()];
+  });
   moneyChart.update();
   transportChart.update();
+  timeSpendChart.update();
 };
 
 const moneyChart = new Chart(moneyCtx, {
   plugins: [ChartDataLabels],
   type: `horizontalBar`,
   data: {
-    labels: [`✈️ FLY`, `🏨 STAY`, `🚗 DRIVE`, `🏛️ LOOK`, `🍴 EAT`, `🚕 RIDE`, `🛳️ SAIL`, `🚂 TRAIN`, `🚌 BUS`],
+    labels: [`✈️FLY`, `🏨 STAY`, `🚗 DRIVE`, `🏛️ LOOK`, `🍴 EAT`, `🚕 RIDE`, `🛳️ SAIL`, `🚂 TRAIN`, `🚌 BUS`],
     datasets: [{
-      data: [400, 300, 200, 160, 150, 100],
+      data: [],
       backgroundColor: `#ffffff`,
       hoverBackgroundColor: `#ffffff`,
       anchor: `start`,
@@ -93,7 +96,7 @@ const transportChart = new Chart(transportCtx, {
   data: {
     labels: [`🚗 DRIVE`, `🚕 RIDE`, `✈️ FLY`, `🛳️ SAIL`, `🚂 TRAIN`, `🚌 BUS`],
     datasets: [{
-      data: [4, 3, 2, 1],
+      data: [],
       backgroundColor: `#ffffff`,
       hoverBackgroundColor: `#ffffff`,
       anchor: `start`,
@@ -150,6 +153,71 @@ const transportChart = new Chart(transportCtx, {
       enabled: false,
     },
   },
+});
+
+const timeSpendChart = new Chart(timeSpendCtx, {
+  plugins: [ChartDataLabels],
+  type: `horizontalBar`,
+  data: {
+    labels: [`✈️AIRCRAFT`, `🏨 HOTEL`, `🚗 DRIVE`, `🏛️ LOOK`, `🍴 RESTAURANTS`, `🚕 RIDE`, `🛳️ SHIP`, `🚂 TRAIN`, `🚌 BUS`],
+    datasets: [{
+      data: [],
+      backgroundColor: `#ffffff`,
+      hoverBackgroundColor: `#ffffff`,
+      anchor: `start`,
+    }],
+  },
+  options: {
+    plugins: {
+      datalabels: {
+        font: {
+          size: 13
+        },
+        color: `#000000`,
+        anchor: `end`,
+        align: `start`,
+        formatter: (val) => `${val}H`
+      }
+    },
+    title: {
+      display: true,
+      text: `TIME SPENT`,
+      fontColor: `#000000`,
+      fontSize: 23,
+      position: `left`
+    },
+    scales: {
+      yAxes: [{
+        ticks: {
+          fontColor: `#000000`,
+          padding: 5,
+          fontSize: 13,
+        },
+        gridLines: {
+          display: false,
+          drawBorder: false
+        },
+        barThickness: 44
+      }],
+      xAxes: [{
+        ticks: {
+          display: false,
+          beginAtZero: true,
+        },
+        gridLines: {
+          display: false,
+          drawBorder: false
+        },
+        minBarLength: 50
+      }],
+    },
+    legend: {
+      display: false
+    },
+    tooltips: {
+      enabled: false,
+    }
+  }
 });
 
 export default updateData;

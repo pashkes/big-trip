@@ -17,6 +17,7 @@ const onClickToggleModeView = () => {
       targetElement.classList.remove(`visually-hidden`);
       previousModeElement.classList.add(`visually-hidden`);
       target.classList.add(`view-switch__item--active`);
+      window.scrollTo(0, 0);
     });
   });
 };

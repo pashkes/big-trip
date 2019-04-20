@@ -2,14 +2,20 @@ import Filter from "./filter";
 import Waypoint from "./waypoint";
 import EditWaypoint from "./edit-waypoint";
 import updateData from "./statistics";
-import {filters, STATISTICS, TYPE_EVENTS} from "./data";
+import {filters, STATISTICS, TYPE_EVENTS, sorts} from "./data";
 import onClickToggleModeView from "./view-mode";
 import API from "./api";
 import {createElement} from "./util";
+import moment from 'moment';
+import momentDurationFormatSetup from 'moment-duration-format';
+import TotalCost from "./total-cost";
+import Day from "./day";
+import Sort from "./sort";
 
-const AUTHORIZATION = `Basic dXNlckBwYXNzd29yZAo=14`;
+const AUTHORIZATION = `Basic dXNlckBwYXNzd29yiZAo=1sdy7dd7svs084`;
 const END_POINT = `https://es8-demo-srv.appspot.com/big-trip/`;
-
+const ESC_KEY_CODE = 27;
+const ANIMATION_DURATION_MC = 800;
 const api = new API({endPoint: END_POINT, authorization: AUTHORIZATION});
 const destinations = api.getDestination();
 const getOffers = api.getOffers();
@@ -17,11 +23,18 @@ const offers = new Map();
 const citiesList = new Map();
 const eventContaiter = document.querySelector(`.trip-day__items`);
 const listOfFilter = document.querySelector(`.trip-filter`);
-const animationDurationMC = 800;
+const newEventBtn = document.querySelector(`.new-event`);
+const header = document.querySelector(`.trip`);
+const points = document.querySelector(`.trip-points`);
+const tripSorting = document.querySelector(`.trip-sorting`);
 const state = {
   events: null,
   filter: `everything`,
+  sort: `event`,
 };
+
+momentDurationFormatSetup(moment);
+
 destinations.then((cities) => {
   cities.forEach((city) => {
     citiesList.set(city.name, {description: city.description, pictures: [...city.pictures]});
@@ -31,37 +44,52 @@ destinations.then((cities) => {
 getOffers.then((list) => list.forEach((item) => {
   offers.set(item.type, item.offers);
 }));
+
 const getStatistics = (events) => {
+  const currentDate = new Date();
   STATISTICS.spentMoney.forEach((item, key) => STATISTICS.spentMoney.set(key, 0));
   STATISTICS.wasUsed.forEach((item, key) => STATISTICS.wasUsed.set(key, 0));
-  events.forEach((item) => {
+  STATISTICS.spentTime.forEach((item, key) => STATISTICS.spentTime.set(key, 0));
+
+  // сначало получение законченых событий
+  events.filter((it) => it.dateFrom.getTime() < currentDate.getTime()).forEach((item) => {
     if (STATISTICS.spentMoney.has(item.type)) {
       STATISTICS.spentMoney.set(item.type, STATISTICS.spentMoney.get(item.type) + item.price);
     }
     if (STATISTICS.wasUsed.has(item.type)) {
       STATISTICS.wasUsed.set(item.type, STATISTICS.wasUsed.get(item.type) + 1);
     }
+    if (STATISTICS.spentTime.has(item.type)) {
+      const spentTime = moment.duration(moment(item.dateTo).diff(item.dateFrom)).hours();
+      STATISTICS.spentTime.set(item.type, STATISTICS.spentTime.get(item.type) + spentTime);
+    }
   });
+
   return STATISTICS;
 };
 
-const updateEvent = (newEvent) => {
+const updateDataEvent = (newEvent) => {
   const updatedItemIndex = state.events.findIndex((item) => item.id === newEvent.id);
   return Object.assign(state.events[updatedItemIndex], newEvent);
 };
 
 const deleteEvent = (id) => {
   const removedItemIndex = state.events.findIndex((item) => item.id === id);
-  const filtered = filterEvents(state.events, state.filter);
   state.events.splice(removedItemIndex, 1);
-  renderEvents(filtered);
-  updateData(getStatistics(filtered));
+
+  if (state.events.length !== 0) {
+    const filtered = filterEvents(state.events, state.filter);
+    const sort = sortEvents(filtered, state.sort);
+    renderEvents(sort);
+    updateData(getStatistics(filtered));
+  }
 };
 
 // Хотел изначально добавить это в виде метода для класса ModelEvent
 // но появляется ошибка которую я не могу исправить
 const toRAW = (data) => {
   const listOfOffers = [];
+
   data.offers.forEach((item, key) => {
     listOfOffers.push({
       title: key,
@@ -78,42 +106,55 @@ const toRAW = (data) => {
     'offers': listOfOffers,
     'destination': {
       'name': data.city,
-      'pictures': data.photos,
+      'pictures': data.photos || [],
       'description': data.description,
     },
-    'is_favorite': data.isFavorite ? `true` : `false`,
+    'is_favorite': !!data.isFavorite,
   };
 };
 
-const onSubmit = (newObject, event) => {
-  // Тут и в сеттере onDelete есть одинаковый код который нужно было бы куда-то
-  // отдельно вынести поидее
-  const submitBtn = event.element.querySelector(`.point__button--save`);
-  const deleteBtn = event.element.querySelector(`.point__button--delete`);
+const lockForm = (submitBtn, deleteBtn) => {
   submitBtn.disabled = true;
   deleteBtn.disabled = true;
   submitBtn.textContent = `Saving...`;
+};
+
+const unlockForm = (submitBtn, deleteBtn) => {
+  submitBtn.textContent = `Save`;
+  submitBtn.disabled = false;
+  deleteBtn.disabled = false;
+};
+
+const initErrorForm = (form) => {
+  form.classList.add(`jello`);
+  form.classList.add(`error`);
+  setTimeout(() => {
+    form.classList.remove(`jello`);
+    form.classList.remove(`error`);
+  }, ANIMATION_DURATION_MC);
+};
+
+const onSubmit = (newObject, event) => {
+  const submitBtn = event.element.querySelector(`.point__button--save`);
+  const deleteBtn = event.element.querySelector(`.point__button--delete`);
+
+  lockForm(submitBtn, deleteBtn);
   api.updateEvent({id: event.id, data: toRAW(newObject)}).then((newEvent) => {
     const filtered = filterEvents(state.events, state.filter);
-    updateEvent(newEvent);
-    renderEvents(filtered);
+    const sort = sortEvents(filtered, state.sort);
+
+    updateDataEvent(newEvent);
+    renderEvents(sort);
     updateData(getStatistics(filtered));
     event.destroy();
   })
     .catch(() => {
-      event.element.classList.add(`jello`);
-      event.element.classList.add(`error`);
-      submitBtn.textContent = `Save`;
-      submitBtn.disabled = false;
-      deleteBtn.disabled = false;
-      setTimeout(() => {
-        event.element.classList.remove(`jello`);
-        event.element.classList.remove(`error`);
-      }, animationDurationMC);
+      unlockForm(submitBtn, deleteBtn);
+      initErrorForm(event.element);
     });
 };
 
-const createImage = (src, alt, className) => {
+const makeImage = (src, alt, className) => {
   const img = new Image();
   img.src = src;
   img.alt = alt;
@@ -121,111 +162,167 @@ const createImage = (src, alt, className) => {
   return img;
 };
 
-const renderEvents = (events) => {
-  const fragment = document.createDocumentFragment();
+const onChangeType = (element, evt) => {
+  const offfers = element.element.querySelector(`.point__offers-wrap`);
+  const selectedWay = element.element.querySelector(`.travel-way__label`);
+  const totalPrice = element.element.querySelector(`.point__price input`);
+  const destinationLabel = element.element.querySelector(`.point__destination-label`);
 
-  events.forEach((item) => {
-    const waypointComponent = new Waypoint(item);
-    const openedWaypoint = new EditWaypoint(item);
+  selectedWay.textContent = TYPE_EVENTS[evt.target.value].icon;
+  destinationLabel.textContent = `${evt.target.value} ${TYPE_EVENTS[evt.target.value].add}`;
+  if (!offers.has(evt.target.value)) {
+    offfers.innerHTML = ``;
+    element._offers = new Map();
+    return;
+  }
+  const targetType = offers.get(evt.target.value);
+  const fragmentForOffers = document.createDocumentFragment();
 
-    waypointComponent.onClick = () => {
-      openedWaypoint.render();
-      eventContaiter.replaceChild(openedWaypoint.element, waypointComponent._element);
-    };
-
-    openedWaypoint.onChangeType = (evt) => {
-      const offfers = openedWaypoint.element.querySelector(`.point__offers-wrap`);
-      if (!offers.has(evt.target.value)) {
-        offfers.innerHTML = ``;
-        openedWaypoint._offers = new Map();
-        return;
-      }
-      const selectedWay = openedWaypoint.element.querySelector(`.travel-way__label`);
-      const targetType = offers.get(evt.target.value);
-      const fragmentForOffers = document.createDocumentFragment();
-      selectedWay.textContent = TYPE_EVENTS[evt.target.value];
-      targetType.forEach((offer) => {
-        const offerTemplate = openedWaypoint.offerTemplate(offer.name, offer.price);
-        fragmentForOffers.appendChild(createElement(offerTemplate));
-      });
-      openedWaypoint._offers.clear();
-      targetType.forEach((offer) => {
-        openedWaypoint._offers.set(offer.name, {price: offer.price, isChecked: false});
-      });
-      offfers.innerHTML = ``;
-      offfers.appendChild(fragmentForOffers);
-    };
-
-    openedWaypoint.onSearch = () => {
-      const datalist = openedWaypoint.element.querySelector(`datalist`);
-      const citiesFragment = document.createDocumentFragment();
-      for (let [key] of citiesList) {
-        citiesFragment.appendChild(createElement(`<option value="${key}">`));
-      }
-      datalist.appendChild(citiesFragment);
-    };
-
-    openedWaypoint.onChangeCity = (evt) => {
-      const pictures = openedWaypoint.element.querySelector(`.point__destination-images`);
-      const description = openedWaypoint.element.querySelector(`.point__destination-text`);
-      if (!citiesList.has(evt.target.value)) {
-        pictures.innerHTML = ``;
-        pictures.textContent = `no photos`;
-        description.textContent = `no description`;
-        openedWaypoint._description = ``;
-        openedWaypoint._photos = [];
-        return;
-      }
-      const targetCity = citiesList.get(evt.target.value);
-      const fragmentForPhotos = document.createDocumentFragment();
-      description.textContent = targetCity.description;
-      openedWaypoint._description = targetCity.description;
-      openedWaypoint._photos = targetCity.pictures;
-      targetCity.pictures.forEach((picture) => {
-        fragmentForPhotos.appendChild(createImage(picture.src, picture.alt, `point__destination-image`));
-      });
-      pictures.innerHTML = ``;
-      pictures.appendChild(fragmentForPhotos);
-    };
-
-    openedWaypoint.onSubmit = onSubmit;
-
-    openedWaypoint.onDelete = () => {
-      const submitBtn = openedWaypoint.element.querySelector(`.point__button--save`);
-      const deleteBtn = openedWaypoint.element.querySelector(`.point__button--delete`);
-      submitBtn.disabled = true;
-      deleteBtn.disabled = true;
-      deleteBtn.textContent = `Deleting...`;
-      api.deleteEvent({id: item.id})
-        .then(() => api.getOffers())
-        .then(() => {
-          deleteEvent(item.id);
-          openedWaypoint.destroy();
-          updateData(getStatistics(state.events));
-        })
-        .catch(() => {
-          openedWaypoint.element.classList.add(`jello`);
-          openedWaypoint.element.classList.add(`error`);
-          deleteBtn.textContent = `Delete`;
-          submitBtn.disabled = false;
-          deleteBtn.disabled = false;
-          setTimeout(() => {
-            openedWaypoint.element.classList.remove(`jello`);
-            openedWaypoint.element.classList.remove(`error`);
-          }, animationDurationMC);
-        });
-    };
-
-    waypointComponent.render();
-    fragment.appendChild(waypointComponent.element);
+  totalPrice.value = element._price;
+  targetType.forEach((offer) => {
+    const offerTemplate = element.offerTemplate(offer.name, offer.price);
+    fragmentForOffers.appendChild(createElement(offerTemplate));
   });
+  element._offers.clear();
+  targetType.forEach((offer) => {
+    element._offers.set(offer.name, {price: offer.price, isChecked: false});
+  });
+  offfers.innerHTML = ``;
+  offfers.appendChild(fragmentForOffers);
+};
+
+const onSearch = (element) => {
+  const datalist = element.element.querySelector(`datalist`);
+  const citiesFragment = document.createDocumentFragment();
+
+  for (let [key] of citiesList) {
+    citiesFragment.appendChild(createElement(`<option value="${key}">`));
+  }
+  datalist.appendChild(citiesFragment);
+};
+
+const onChangeCity = (element, evt) => {
+  const pictures = element.element.querySelector(`.point__destination-images`);
+  const description = element.element.querySelector(`.point__destination-text`);
+
+  if (!citiesList.has(evt.target.value)) {
+    pictures.innerHTML = ``;
+    pictures.textContent = `no photos`;
+    description.textContent = `no description`;
+    element._description = ``;
+    element._photos = [];
+    return;
+  }
+  const targetCity = citiesList.get(evt.target.value);
+  const fragmentForPhotos = document.createDocumentFragment();
+
+  description.textContent = targetCity.description;
+  element._description = targetCity.description;
+  element._photos = targetCity.pictures;
+  targetCity.pictures.forEach((picture) => {
+    fragmentForPhotos.appendChild(makeImage(picture.src, picture.alt, `point__destination-image`));
+  });
+  pictures.innerHTML = ``;
+  pictures.appendChild(fragmentForPhotos);
+};
+
+const onKeyDownEscExit = (element, evt) => {
+  if (evt.keyCode === ESC_KEY_CODE) {
+    const filtered = filterEvents(state.events, state.filter);
+    const sort = sortEvents(filtered, state.sort);
+
+    element.destroy();
+    renderEvents(sort);
+    newEventBtn.disabled = !newEventBtn.disabled;
+  }
+};
+
+const onChangeOffers = (element, evt) => {
+  const totalPrice = element.element.querySelector(`.point__price input`);
+  const isChecked = evt.target.checked;
+  let getPriceOfOffer;
+
+  if (isChecked && element._offers.has(evt.target.value)) {
+    getPriceOfOffer = element._offers.get(evt.target.value).price;
+    totalPrice.value = +totalPrice.value + getPriceOfOffer;
+  } else {
+    getPriceOfOffer = element._offers.get(evt.target.value).price;
+    totalPrice.value = +totalPrice.value - getPriceOfOffer;
+  }
+};
+
+const onDelete = (element, id) => {
+  const submitBtn = element.element.querySelector(`.point__button--save`);
+  const deleteBtn = element.element.querySelector(`.point__button--delete`);
+
+  submitBtn.disabled = true;
+  deleteBtn.disabled = true;
+  deleteBtn.textContent = `Deleting...`;
+  api.deleteEvent({id})
+    .then(() => api.getOffers())
+    .then(() => {
+      deleteEvent(id);
+      element.destroy();
+      if (state.events === null) {
+        state.events = [];
+      }
+      const filtered = filterEvents(state.events, state.filter);
+      const sort = sortEvents(filtered, state.sort);
+      renderEvents(sort);
+      updateData(getStatistics(state.events));
+    })
+    .catch(() => {
+      initErrorForm(element.element);
+    });
+  newEventBtn.disabled = false;
+};
+
+const renderEvents = (events) => {
+  if (events.length === 0) {
+    points.innerHTML = ``;
+    return;
+  }
+  const getTotalCost = [...events.map((it) => +it.price)].reduce((a, c) => a + c);
+  const totalCost = new TotalCost(getTotalCost);
+  const days = events.map((it) => moment(it.dateFrom).format(`DD MMM YY`));
+  const listOfDays = [...new Set(days)];
+  points.innerHTML = ``;
+  for (let date of listOfDays) {
+    const dayGroup = events.filter((it) => moment(it.dateFrom).format(`DD MMM YY`) === date);
+    const day = new Day(date).render();
+    const pointsContainer = day.querySelector(`.trip-day__items`);
+    dayGroup.forEach((item) => {
+      const waypointComponent = new Waypoint(item);
+      const openedWaypoint = new EditWaypoint(item);
+
+      waypointComponent.onClick = () => {
+        openedWaypoint.render();
+        pointsContainer.replaceChild(openedWaypoint.element, waypointComponent.element);
+      };
+      openedWaypoint.onChangeType = onChangeType;
+      openedWaypoint.onSearch = onSearch;
+      openedWaypoint.onChangeCity = onChangeCity;
+      openedWaypoint.onSubmit = onSubmit;
+      openedWaypoint.onKeyDownEscExit = onKeyDownEscExit;
+      openedWaypoint.onChangeOffers = onChangeOffers;
+      openedWaypoint.onDelete = onDelete;
+      waypointComponent.render();
+      pointsContainer.appendChild(waypointComponent.element);
+    });
+    points.appendChild(day);
+  }
 
   eventContaiter.innerHTML = ``;
-  eventContaiter.appendChild(fragment);
+  header.lastElementChild.remove();
+  header.appendChild(totalCost.render());
 };
 
 const filterEvents = (events, filterType) => {
+  if (!events) {
+    return false;
+  }
   const currentDate = new Date();
+
   switch (filterType) {
     case `future`:
       return events.filter((it) => it.dateFrom.getTime() > currentDate.getTime());
@@ -243,11 +340,10 @@ const renderFilters = (filtersData) => {
     const filter = new Filter(item);
     filter.render();
     filter.onFilter = (evt) => {
-      eventContaiter.innerHTML = ``;
       state.filter = evt.target.value;
       const filtered = filterEvents(state.events, state.filter);
+      eventContaiter.innerHTML = ``;
       renderEvents(filtered);
-      updateData(getStatistics(filtered));
     };
 
     fragment.appendChild(filter.element);
@@ -257,14 +353,110 @@ const renderFilters = (filtersData) => {
   listOfFilter.appendChild(fragment);
 };
 
+const onClickButtonHandle = (evt) => {
+  let idEvent;
+  if (state.events === null) {
+    idEvent = 0;
+  } else {
+    idEvent = state.events.length;
+  }
+  const newEvent = new EditWaypoint({id: idEvent});
+  newEvent.onChangeType = onChangeType;
+  newEvent.onSearch = onSearch;
+  newEvent.onChangeCity = onChangeCity;
+  evt.target.disabled = true;
+  newEvent.onSubmit = (newObject, event) => {
+    const submitBtn = event.element.querySelector(`.point__button--save`);
+    const deleteBtn = event.element.querySelector(`.point__button--delete`);
+    lockForm(submitBtn, deleteBtn);
+    api.createEvent(toRAW(newObject)).then((newMadeEvent) => {
+      if (state.events === null) {
+        state.events = [];
+      }
+      state.events.push(newMadeEvent);
+      const filtered = filterEvents(state.events, state.filter);
+      const sort = sortEvents(filtered, state.sort);
+      renderEvents(sort);
+      updateData(getStatistics(sort));
+      event.destroy();
+      evt.target.disabled = false;
+    })
+      .catch(() => {
+        unlockForm(submitBtn, deleteBtn);
+        initErrorForm(event.element);
+        evt.target.disabled = false;
+      });
+  };
+  newEvent.onKeyDownEscExit = onKeyDownEscExit;
+  newEvent.onChangeOffers = onChangeOffers;
+
+  points.prepend(newEvent.render());
+  newEvent.element.classList.add(`editing`);
+  window.scrollTo(0, 0);
+};
+
+
+const sortToTime = (events) => {
+  return events.sort((current, next) => {
+    const durationCurrent = current.dateTo - current.dateFrom;
+    const durationNext = next.dateTo - next.dateFrom;
+    return durationCurrent - durationNext;
+  });
+};
+
+const sortToSpentMoney = (events) => {
+  return events.sort((current, next) => current.price - next.price);
+};
+
+const renderSorts = (sortData) => {
+  const fragment = document.createDocumentFragment();
+
+  for (let item of sortData) {
+    const sortItem = new Sort(item);
+    sortItem.render();
+    sortItem.onChange = (evt) => {
+      const filtered = filterEvents(state.events, state.filter);
+      state.sort = evt.target.value;
+      const sorted = sortEvents(filtered, state.sort);
+      eventContaiter.innerHTML = ``;
+      renderEvents(sorted);
+    };
+    fragment.appendChild(sortItem.element);
+  }
+  tripSorting.prepend(fragment);
+};
+
+const sortEvents = (events, sortType) => {
+  if (!events) {
+    return false;
+  }
+  switch (sortType) {
+    case `time`:
+      return sortToTime(events);
+    case `price`:
+      return sortToSpentMoney(events);
+    default:
+      return events;
+  }
+};
+
+newEventBtn.addEventListener(`click`, onClickButtonHandle);
+onClickToggleModeView();
 renderFilters(filters);
+renderSorts(sorts);
 eventContaiter.innerHTML = `Loading route...`;
 api.getPoints()
   .then((events) => {
-    renderEvents(events);
-    state.events = events;
+    if (events.length === 0) {
+      eventContaiter.innerHTML = ``;
+      points.innerHTML = ``;
+    } else {
+      renderEvents(events);
+      updateData(getStatistics(events));
+      state.events = events;
+    }
   })
   .catch(() => {
     eventContaiter.innerHTML = `Something went wrong while loading your route info. Check your connection or try again later`;
   });
-onClickToggleModeView();
+

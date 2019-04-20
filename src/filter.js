@@ -10,6 +10,7 @@ class Filter extends Component {
   _onChangeFilter(evt) {
     evt.preventDefault();
     if (typeof this._onFilter === `function`) {
+      window.scrollTo(0, 0);
       this._onFilter(evt);
     }
   }
