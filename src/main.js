@@ -167,12 +167,12 @@ const onChangeType = (element, evt) => {
   const selectedWay = element.element.querySelector(`.travel-way__label`);
   const totalPrice = element.element.querySelector(`.point__price input`);
   const destinationLabel = element.element.querySelector(`.point__destination-label`);
+  const toggleDropdown = element.element.querySelector(`.travel-way__toggle `);
 
   selectedWay.textContent = TYPE_EVENTS[evt.target.value].icon;
   destinationLabel.textContent = `${evt.target.value} ${TYPE_EVENTS[evt.target.value].add}`;
+  toggleDropdown.checked = false;
   if (!offers.has(evt.target.value)) {
-    offfers.innerHTML = ``;
-    element._offers = new Map();
     return;
   }
   const targetType = offers.get(evt.target.value);
@@ -206,11 +206,6 @@ const onChangeCity = (element, evt) => {
   const description = element.element.querySelector(`.point__destination-text`);
 
   if (!citiesList.has(evt.target.value)) {
-    pictures.innerHTML = ``;
-    pictures.textContent = `no photos`;
-    description.textContent = `no description`;
-    element._description = ``;
-    element._photos = [];
     return;
   }
   const targetCity = citiesList.get(evt.target.value);

@@ -6,14 +6,14 @@ class EditWaypoint extends Component {
   constructor(data) {
     super();
     this._id = data.id;
-    this._type = data.type || `flight`;
+    this._type = data.type || `taxi`;
     this._city = data.city || ``;
     this._timeFrom = data.dateFrom || new Date();
     this._timeTo = data.dateTo || new Date();
     this._price = data.price || 0;
     this._offers = data.offers || new Map();
     this._photos = data.photos | [];
-    this._description = data.description || `no any description`;
+    this._description = data.description || ``;
     this._isFavorite = data.isFavorite || false;
     this._onChangeType = null;
     this._onChangeRadioType = this._onChangeRadioType.bind(this);
