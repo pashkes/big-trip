@@ -24,6 +24,7 @@ const state = {
   events: null,
   filter: `everything`,
   sort: `event`,
+  mode: `default`
 };
 
 const getCurrentStateEvents = () => {
@@ -75,6 +76,10 @@ const onSubmit = (newObject, event) => {
     renderEvents(getCurrentStateEvents());
     getStatistics(getCurrentStateEvents(), updateData);
     event.destroy();
+    if (state.mode === `editing`) {
+      newEventBtn.disabled = !newEventBtn.disabled;
+      state.mode = `default`;
+    }
   })
     .catch(() => {
       unlockForm(submitBtn, deleteBtn);
@@ -86,6 +91,10 @@ const onKeyDownEscExit = (element, evt) => {
   if (evt.keyCode === ESC_KEY_CODE) {
     element.destroy();
     renderEvents(getCurrentStateEvents());
+    if (state.mode === `editing`) {
+      newEventBtn.disabled = !newEventBtn.disabled;
+      state.mode = `default`;
+    }
   }
 };
 
@@ -197,6 +206,8 @@ const createEvent = (newObject, event) => {
     renderEvents(getCurrentStateEvents());
     getStatistics(getCurrentStateEvents(), updateData);
     event.destroy();
+    newEventBtn.disabled = !newEventBtn.disabled;
+    state.mode = `default`;
   })
     .catch(() => {
       unlockForm(submitBtn, deleteBtn);
@@ -204,7 +215,7 @@ const createEvent = (newObject, event) => {
     });
 };
 
-const newEventClickHandler = () => {
+const newEventClickHandler = (evt) => {
   let idEvent;
   if (state.events === null) {
     idEvent = 0;
@@ -212,11 +223,12 @@ const newEventClickHandler = () => {
     idEvent = state.events.length;
   }
   const newEvent = new EventEdit({id: idEvent});
+  state.mode = `editing`;
   newEvent.offers = offers;
   newEvent.cities = cities;
   newEvent.onSubmit = createEvent;
   newEvent.onKeyDownEscExit = onKeyDownEscExit;
-
+  evt.target.disabled = !evt.target.disabled;
   points.prepend(newEvent.render());
   newEvent.element.classList.add(`editing`);
   window.scrollTo(0, 0);
