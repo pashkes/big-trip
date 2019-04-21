@@ -1,8 +1,7 @@
-import {TYPE_EVENTS} from "./constants";
+import {TYPE_EVENTS, WAY_OF_GROUPS} from "./constants";
 import Component from "./component";
 import flatpickr from "flatpickr";
 import {createElement, makeImage} from "./util";
-
 
 class EventEdit extends Component {
   constructor(data) {
@@ -41,10 +40,11 @@ class EventEdit extends Component {
   }
 
   get template() {
+
     const getOffers = () => {
       const offers = [];
       this._offers.forEach((item, key) => {
-        offers.push(EventEdit._getOfferTemplate(key, item.price, item.isChecked));
+        offers.push(this._getOfferTemplate(key, item.price, item.isChecked));
       });
       return offers.join(``);
     };
@@ -63,34 +63,10 @@ class EventEdit extends Component {
 
               <div class="travel-way__select">
                 <div class="travel-way__select-group">
-                  <input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-taxi" name="travel-way" value="taxi" ${this._type === `taxi` ? `checked` : ``}>
-                  <label class="travel-way__select-label" for="travel-way-taxi">🚕 taxi</label>
-
-                  <input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-bus" name="travel-way" value="bus" ${this._type === `bus` ? `checked` : ``}>
-                  <label class="travel-way__select-label" for="travel-way-bus">🚌 bus</label>
-
-                  <input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-train" name="travel-way" value="train" ${this._type === `train` ? `checked` : ``}>
-                  <label class="travel-way__select-label" for="travel-way-train">🚂 train</label>
-
-                  <input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-flight" name="travel-way" value="flight" ${this._type === `flight` ? `checked` : ``}>
-                  <label class="travel-way__select-label" for="travel-way-flight">✈️ flight</label>
-                  
-                  <input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-transport" name="travel-way" value="transport" ${this._type === `transport` ? `checked` : ``}>
-                  <label class="travel-way__select-label" for="travel-way-transport">🚊 transport</label>
-                  <input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-drive" name="travel-way" value="drive" ${this._type === `drive` ? `checked` : ``}>
-                  <label class="travel-way__select-label" for="travel-way-drive">🚗 drive</label>
-                  
-                  <input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-ship" name="travel-way" value="ship" ${this._type === `ship` ? `checked` : ``}>
-                  <label class="travel-way__select-label" for="travel-way-ship">🛳️ ship</label>
+                 ${this._getTravelWayTemplate(WAY_OF_GROUPS.TRASPORT)}
                 </div>
                 <div class="travel-way__select-group">
-                  <input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-check-in" name="travel-way" value="check-in"  ${this._type === `check-in` ? `checked` : ``}>
-                  <label class="travel-way__select-label" for="travel-way-check-in">🏨 check-in</label>
-                  
-                  <input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-sightseeing" name="travel-way" value="sightseeing" ${this._type === `sightseeing` ? `checked` : ``}>
-                  <label class="travel-way__select-label" for="travel-way-sightseeing">🏛 sightseeing</label>
-                  <input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-restaurant" name="travel-way" value="restaurant" ${this._type === `restaurant` ? `checked` : ``}>
-                  <label class="travel-way__select-label" for="travel-way-restaurant">🍴 restaurant</label>
+                  ${this._getTravelWayTemplate(WAY_OF_GROUPS.PLACES)}
                 </div>
               </div>
             </div>
@@ -135,7 +111,7 @@ class EventEdit extends Component {
               <h3 class="point__details-title">Destination</h3>
               <p class="point__destination-text">${this._description ? this._description : ``}</p>
               <div class="point__destination-images">
-                ${this._photos ? this._photos.map((photo) => `<img src="${photo.src}" alt="${photo.description}" class="point__destination-image">`).join(``).trim() : ``}
+                ${this._getPhotosTemplate()}
               </div>
             </section>
             <input type="hidden" class="point__total-price" name="total-price" value="">
@@ -144,7 +120,7 @@ class EventEdit extends Component {
       </article>`.trim();
   }
 
-  static _getOfferTemplate(value, price, isChecked = false) {
+  _getOfferTemplate(value, price, isChecked = false) {
     const id = value.split(` `).join(`-`);
     return `<div>
               <input class="point__offers-input visually-hidden" type="checkbox" id="${id}" name="offer" value="${value}" ${isChecked ? `checked` : ``}>
@@ -152,6 +128,17 @@ class EventEdit extends Component {
                 <span class="point__offer-service">${value}</span> + €<span class="point__offer-price">${price}</span>
               </label>
             </div>`.trim();
+  }
+
+  _getTravelWayTemplate(ways) {
+    return ways.map((item) => {
+      return `<input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-${item}" name="travel-way" value="${item}" ${this._type === item ? `checked` : ``}>
+          <label class="travel-way__select-label" for="travel-way-${name}">${TYPE_EVENTS[item].icon} ${item}</label>`.trim();
+    }).join(``);
+  }
+
+  _getPhotosTemplate() {
+    return this._photos ? this._photos.map((photo) => `<img src="${photo.src}" alt="${photo.description}" class="point__destination-image">`).join(``).trim() : ``;
   }
 
   _onChangeRadioType(evt) {
@@ -172,7 +159,7 @@ class EventEdit extends Component {
 
     totalPrice.value = this._price;
     targetType.forEach((offer) => {
-      const offerTemplate = EventEdit._getOfferTemplate(offer.name, offer.price);
+      const offerTemplate = this._getOfferTemplate(offer.name, offer.price);
       fragmentForOffers.appendChild(createElement(offerTemplate));
     });
     this._offers.clear();
@@ -270,7 +257,7 @@ class EventEdit extends Component {
       return;
     }
     evt.preventDefault();
-    const formData = new FormData(this._element.querySelector(`form`));
+    const formData = new FormData(evt.target);
     const updatedEvent = this._processForm(formData);
     updatedEvent.id = this._id;
     this._onSubmit(updatedEvent, this, evt);

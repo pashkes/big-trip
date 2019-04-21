@@ -1,4 +1,4 @@
-const AUTHORIZATION = `Basic dXNlckBwYXNzd29yiZAo=1sddd7y7dd7svs084`;
+const AUTHORIZATION = `Basic dXNlckBwYXNzd29yiZAo=1sddd7y7ssddd7svs084`;
 const END_POINT = `https://es8-demo-srv.appspot.com/big-trip/`;
 const ESC_KEY_CODE = 27;
 const ANIMATION_DURATION_MC = 800;
@@ -13,6 +13,11 @@ const TYPE_EVENTS = {
   'check-in': {icon: `🏨`, add: `in`},
   'sightseeing': {icon: `🏛️`, add: `in`},
   'restaurant': {icon: `🍴`, add: `in`},
+};
+
+const WAY_OF_GROUPS = {
+  TRASPORT: [`taxi`, `bus`, `train`, `flight`, `transport`, `drive`, `ship`],
+  PLACES: [`check-in`, `sightseeing`, `restaurant`],
 };
 
 const STATISTICS = {
@@ -78,4 +83,4 @@ const SORTS = [
   },
 ];
 
-export {TYPE_EVENTS, FILTERS, STATISTICS, SORTS, AUTHORIZATION, END_POINT, ESC_KEY_CODE, ANIMATION_DURATION_MC};
+export {TYPE_EVENTS, FILTERS, STATISTICS, SORTS, AUTHORIZATION, END_POINT, ESC_KEY_CODE, ANIMATION_DURATION_MC, WAY_OF_GROUPS};
