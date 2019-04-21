@@ -5,7 +5,6 @@ import moment from 'moment';
 import momentDurationFormatSetup from "moment-duration-format";
 momentDurationFormatSetup(moment);
 
-
 const moneyCtx = document.querySelector(`.statistic__money`);
 const transportCtx = document.querySelector(`.statistic__transport`);
 const timeSpendCtx = document.querySelector(`.statistic__time-spend`);
@@ -14,6 +13,7 @@ const BAR_HEIGHT = 55;
 moneyCtx.height = BAR_HEIGHT * 9;
 transportCtx.height = BAR_HEIGHT * 6;
 timeSpendCtx.height = BAR_HEIGHT * 9;
+
 const updateData = (data) => {
   moneyChart.data.datasets.forEach((it) => {
     it.data = [...data.spentMoney.values()];
@@ -27,6 +27,27 @@ const updateData = (data) => {
   moneyChart.update();
   transportChart.update();
   timeSpendChart.update();
+};
+
+const getStatistics = (events, cb) => {
+  const currentDate = new Date();
+  STATISTICS.spentMoney.forEach((item, key) => STATISTICS.spentMoney.set(key, 0));
+  STATISTICS.wasUsed.forEach((item, key) => STATISTICS.wasUsed.set(key, 0));
+  STATISTICS.spentTime.forEach((item, key) => STATISTICS.spentTime.set(key, 0));
+
+  events.filter((it) => it.dateFrom.getTime() < currentDate.getTime()).forEach((item) => {
+    if (STATISTICS.spentMoney.has(item.type)) {
+      STATISTICS.spentMoney.set(item.type, STATISTICS.spentMoney.get(item.type) + item.price);
+    }
+    if (STATISTICS.wasUsed.has(item.type)) {
+      STATISTICS.wasUsed.set(item.type, STATISTICS.wasUsed.get(item.type) + 1);
+    }
+    if (STATISTICS.spentTime.has(item.type)) {
+      const spentTime = moment.duration(moment(item.dateTo).diff(item.dateFrom)).hours();
+      STATISTICS.spentTime.set(item.type, STATISTICS.spentTime.get(item.type) + spentTime);
+    }
+  });
+  cb(STATISTICS);
 };
 
 const moneyChart = new Chart(moneyCtx, {
@@ -223,27 +244,5 @@ const timeSpendChart = new Chart(timeSpendCtx, {
     }
   }
 });
-
-const getStatistics = (events, cb) => {
-  const currentDate = new Date();
-  STATISTICS.spentMoney.forEach((item, key) => STATISTICS.spentMoney.set(key, 0));
-  STATISTICS.wasUsed.forEach((item, key) => STATISTICS.wasUsed.set(key, 0));
-  STATISTICS.spentTime.forEach((item, key) => STATISTICS.spentTime.set(key, 0));
-
-  // сначало получение законченых событий
-  events.filter((it) => it.dateFrom.getTime() < currentDate.getTime()).forEach((item) => {
-    if (STATISTICS.spentMoney.has(item.type)) {
-      STATISTICS.spentMoney.set(item.type, STATISTICS.spentMoney.get(item.type) + item.price);
-    }
-    if (STATISTICS.wasUsed.has(item.type)) {
-      STATISTICS.wasUsed.set(item.type, STATISTICS.wasUsed.get(item.type) + 1);
-    }
-    if (STATISTICS.spentTime.has(item.type)) {
-      const spentTime = moment.duration(moment(item.dateTo).diff(item.dateFrom)).hours();
-      STATISTICS.spentTime.set(item.type, STATISTICS.spentTime.get(item.type) + spentTime);
-    }
-  });
-  cb(STATISTICS);
-};
 
 export {updateData, getStatistics};

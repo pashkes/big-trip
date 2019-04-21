@@ -33,11 +33,18 @@ class EventEdit extends Component {
     this._onDeleteButtonClick = this._onDeleteButtonClick.bind(this);
   }
 
+  get id() {
+    if (this._id === undefined) {
+      throw new Error(`You have to define template.`);
+    }
+    return this._id;
+  }
+
   get template() {
     const getOffers = () => {
       const offers = [];
       this._offers.forEach((item, key) => {
-        offers.push(EventEdit._offerTemplate(key, item.price, item.isChecked));
+        offers.push(EventEdit._getOfferTemplate(key, item.price, item.isChecked));
       });
       return offers.join(``);
     };
@@ -137,7 +144,7 @@ class EventEdit extends Component {
       </article>`.trim();
   }
 
-  static _offerTemplate(value, price, isChecked = false) {
+  static _getOfferTemplate(value, price, isChecked = false) {
     const id = value.split(` `).join(`-`);
     return `<div>
               <input class="point__offers-input visually-hidden" type="checkbox" id="${id}" name="offer" value="${value}" ${isChecked ? `checked` : ``}>
@@ -165,7 +172,7 @@ class EventEdit extends Component {
 
     totalPrice.value = this._price;
     targetType.forEach((offer) => {
-      const offerTemplate = EventEdit._offerTemplate(offer.name, offer.price);
+      const offerTemplate = EventEdit._getOfferTemplate(offer.name, offer.price);
       fragmentForOffers.appendChild(createElement(offerTemplate));
     });
     this._offers.clear();

@@ -1,22 +1,20 @@
-import {getCitiesOfList, getOffersOfList} from "./data";
+import {FILTERS, SORTS, AUTHORIZATION, END_POINT, ESC_KEY_CODE, ANIMATION_DURATION_MC} from "./constants";
 import Filter from "./filter";
 import Event from "./event";
 import EventEdit from "./event-edit";
-import {updateData, getStatistics} from "./statistics";
-import {FILTERS, SORTS, AUTHORIZATION, END_POINT, ESC_KEY_CODE, ANIMATION_DURATION_MC} from "./constants";
-import onClickToggleModeView from "./view-mode";
 import API from "./api";
-import moment from 'moment';
-import momentDurationFormatSetup from 'moment-duration-format';
 import TotalCost from "./total-cost";
 import Day from "./day";
 import Sorter from "./sorter";
+import {getCitiesOfList, getOffersOfList} from "./data";
+import {updateData, getStatistics} from "./statistics";
+import onClickToggleModeView from "./view-mode";
 import {toRAW} from "./model-event";
+import moment from 'moment';
 
 const api = new API({endPoint: END_POINT, authorization: AUTHORIZATION});
 const cities = getCitiesOfList();
 const offers = getOffersOfList();
-const eventContaiter = document.querySelector(`.trip-day__items`);
 const listOfFilter = document.querySelector(`.trip-filter`);
 const newEventBtn = document.querySelector(`.new-event`);
 const header = document.querySelector(`.trip`);
@@ -30,18 +28,17 @@ const state = {
 
 const renderEvents = (events) => {
   if (events.length === 0) {
-    points.innerHTML = ``;
     return;
   }
   const totalCost = new TotalCost(countTotalCosts(events));
-  const days = events.map((it) => moment(it.dateFrom).format(`DD MMM YY`));
-  const listOfDays = [...new Set(days)];
+  const daysOfEvents = events.map((it) => moment(it.dateFrom).format(`DD-MMM-YY`));
+  const listOfDays = [...new Set(daysOfEvents)];
   points.innerHTML = ``;
   for (let date of listOfDays) {
-    const dayGroups = events.filter((it) => moment(it.dateFrom).format(`DD MMM YY`) === date);
+    const groupsOfDays = events.filter((it) => moment(it.dateFrom).format(`DD-MMM-YY`) === date);
     const day = new Day(date).render();
-    const pointsContainer = day.querySelector(`.trip-day__items`);
-    dayGroups.forEach((item) => {
+    const days = day.querySelector(`.trip-day__items`);
+    groupsOfDays.forEach((item) => {
       const event = new Event(item);
       const eventEdit = new EventEdit(item);
       event.onClick = () => {
@@ -51,59 +48,16 @@ const renderEvents = (events) => {
         eventEdit.cities = cities;
         eventEdit.offers = offers;
         eventEdit.render();
-        pointsContainer.replaceChild(eventEdit.element, event.element);
+        days.replaceChild(eventEdit.element, event.element);
       };
       event.render();
-      pointsContainer.appendChild(event.element);
+      days.appendChild(event.element);
     });
     points.appendChild(day);
   }
 
-  eventContaiter.innerHTML = ``;
   header.lastElementChild.remove();
   header.appendChild(totalCost.render());
-};
-
-const countTotalCosts = (events) => {
-  return [...events.map((it) => +it.price)].reduce((a, c) => a + c);
-};
-
-const updateDataEvent = (newEvent) => {
-  const updatedItemIndex = state.events.findIndex((item) => item.id === newEvent.id);
-  return Object.assign(state.events[updatedItemIndex], newEvent);
-};
-
-const deleteEvent = (id) => {
-  const removedItemIndex = state.events.findIndex((item) => item.id === id);
-  state.events.splice(removedItemIndex, 1);
-
-  if (state.events.length !== 0) {
-    const filtered = filterEvents(state.events, state.filter);
-    const sort = sortEvents(filtered, state.sort);
-    renderEvents(sort);
-    getStatistics(filtered, updateData);
-  }
-};
-
-const lockForm = (submitBtn, deleteBtn) => {
-  submitBtn.disabled = true;
-  deleteBtn.disabled = true;
-  submitBtn.textContent = `Saving...`;
-};
-
-const unlockForm = (submitBtn, deleteBtn) => {
-  submitBtn.textContent = `Save`;
-  submitBtn.disabled = false;
-  deleteBtn.disabled = false;
-};
-
-const initErrorForm = (form) => {
-  form.classList.add(`jello`);
-  form.classList.add(`error`);
-  setTimeout(() => {
-    form.classList.remove(`jello`);
-    form.classList.remove(`error`);
-  }, ANIMATION_DURATION_MC);
 };
 
 const onSubmit = (newObject, event) => {
@@ -162,6 +116,47 @@ const onDelete = (element) => {
   newEventBtn.disabled = false;
 };
 
+const countTotalCosts = (events) => {
+  return [...events.map((it) => +it.price)].reduce((a, c) => a + c);
+};
+
+const updateDataEvent = (newEvent) => {
+  const updatedItemIndex = state.events.findIndex((item) => item.id === newEvent.id);
+  return Object.assign(state.events[updatedItemIndex], newEvent);
+};
+
+const deleteEvent = (id) => {
+  const removedItemIndex = state.events.findIndex((item) => item.id === id);
+  state.events.splice(removedItemIndex, 1);
+
+  if (state.events.length !== 0) {
+    const filtered = filterEvents(state.events, state.filter);
+    const sort = sortEvents(filtered, state.sort);
+    renderEvents(sort);
+    getStatistics(filtered, updateData);
+  }
+};
+
+const lockForm = (submitBtn, deleteBtn) => {
+  submitBtn.disabled = true;
+  deleteBtn.disabled = true;
+  submitBtn.textContent = `Saving...`;
+};
+
+const unlockForm = (submitBtn, deleteBtn) => {
+  submitBtn.textContent = `Save`;
+  submitBtn.disabled = false;
+  deleteBtn.disabled = false;
+};
+
+const initErrorForm = (form) => {
+  form.classList.add(`jello`);
+  form.classList.add(`error`);
+  setTimeout(() => {
+    form.classList.remove(`jello`);
+    form.classList.remove(`error`);
+  }, ANIMATION_DURATION_MC);
+};
 
 const filterEvents = (events, filterType) => {
   if (!events) {
@@ -182,7 +177,6 @@ const filterEvents = (events, filterType) => {
 const onFilter = (evt) => {
   state.filter = evt.target.value;
   const filtered = filterEvents(state.events, state.filter);
-  eventContaiter.innerHTML = ``;
   renderEvents(filtered);
 };
 
@@ -194,7 +188,6 @@ const renderFilters = (filtersOptions) => {
     filter.onFilter = onFilter;
     fragment.appendChild(filter.element);
   }
-  listOfFilter.innerHTML = ``;
   listOfFilter.appendChild(fragment);
 };
 
@@ -249,7 +242,7 @@ const sortToSpentMoney = (events) => {
   return events.sort((current, next) => current.price - next.price);
 };
 
-const renderSorter = (sortData) => {
+const renderSorts = (sortData) => {
   const fragment = document.createDocumentFragment();
 
   for (let item of sortData) {
@@ -259,7 +252,6 @@ const renderSorter = (sortData) => {
       const filtered = filterEvents(state.events, state.filter);
       state.sort = evt.target.value;
       const sorted = sortEvents(filtered, state.sort);
-      eventContaiter.innerHTML = ``;
       renderEvents(sorted);
     };
     fragment.appendChild(sortItem.element);
@@ -280,16 +272,15 @@ const sortEvents = (events, sortType) => {
       return events;
   }
 };
-momentDurationFormatSetup(moment);
+
 newEventBtn.addEventListener(`click`, newEventClickHandler);
 onClickToggleModeView();
 renderFilters(FILTERS);
-renderSorter(SORTS);
-eventContaiter.innerHTML = `Loading route...`;
+renderSorts(SORTS);
+points.innerHTML = `Loading route...`;
 api.getPoints()
   .then((events) => {
     if (events.length === 0) {
-      eventContaiter.innerHTML = ``;
       points.innerHTML = ``;
     } else {
       renderEvents(events);
@@ -298,5 +289,5 @@ api.getPoints()
     }
   })
   .catch(() => {
-    eventContaiter.innerHTML = `Something went wrong while loading your route info. Check your connection or try again later`;
+    points.innerHTML = `Something went wrong while loading your route info. Check your connection or try again later`;
   });

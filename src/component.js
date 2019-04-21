@@ -2,7 +2,6 @@ import {createElement} from "./util";
 
 class Component {
   constructor() {
-    this._id = undefined;
     if (new.target === Component) {
       throw new Error(`Can't instantiate Component, only concrete one.`);
     }
@@ -11,13 +10,6 @@ class Component {
 
   get template() {
     throw new Error(`You have to define template.`);
-  }
-
-  get id() {
-    if (this._id === undefined) {
-      throw new Error(`You have to define template.`);
-    }
-    return this._id;
   }
 
   render() {
