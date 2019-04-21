@@ -1,8 +1,10 @@
-import {TYPE_EVENTS} from "./data";
+import {TYPE_EVENTS} from "./constants";
 import Component from "./component";
 import flatpickr from "flatpickr";
+import {createElement, makeImage} from "./util";
 
-class EditWaypoint extends Component {
+
+class EventEdit extends Component {
   constructor(data) {
     super();
     this._id = data.id;
@@ -12,34 +14,32 @@ class EditWaypoint extends Component {
     this._timeTo = data.dateTo || new Date();
     this._price = data.price || 0;
     this._offers = data.offers || new Map();
-    this._photos = data.photos | [];
+    this._photos = data.photos || [];
     this._description = data.description || ``;
     this._isFavorite = data.isFavorite || false;
-    this._onChangeType = null;
-    this._onChangeRadioType = this._onChangeRadioType.bind(this);
-    this._onChangeOffers = null;
-    this._onChangeCheckboxOffers = this._onChangeCheckboxOffers.bind(this);
-    this._onSearch = null;
-    this._onFocusInputSearch = this._onFocusInputSearch.bind(this);
-    this._onChangeCity = null;
-    this._onChangeInputCity = this._onChangeInputCity.bind(this);
+    this._allOffers = new Map();
+    this._cities = new Map();
     this._onKeyDown = null;
-    this._onKeyDownEsc = this._onKeyDownEsc.bind(this);
     this._initDatePickerStartDate = null;
     this._initDatePickerEndDate = null;
     this._onSubmit = null;
-    this._onSubmitButtonClick = this._onSubmitButtonClick.bind(this);
     this._onDelete = null;
+    this._onChangeRadioType = this._onChangeRadioType.bind(this);
+    this._onChangeOffers = this._onChangeOffers.bind(this);
+    this._onFocusInputSearch = this._onFocusInputSearch.bind(this);
+    this._onChangeInputCity = this._onChangeInputCity.bind(this);
+    this._onKeyDownEsc = this._onKeyDownEsc.bind(this);
+    this._onSubmitButtonClick = this._onSubmitButtonClick.bind(this);
     this._onDeleteButtonClick = this._onDeleteButtonClick.bind(this);
   }
 
   get template() {
     const getOffers = () => {
-      const result = [];
+      const offers = [];
       this._offers.forEach((item, key) => {
-        result.push(this.offerTemplate(key, item.price, item.isChecked));
+        offers.push(EventEdit._offerTemplate(key, item.price, item.isChecked));
       });
-      return result.join(``);
+      return offers.join(``);
     };
     return `
       <article class="point animated fast">
@@ -137,9 +137,8 @@ class EditWaypoint extends Component {
       </article>`.trim();
   }
 
-  offerTemplate(value, price, isChecked = false) {
+  static _offerTemplate(value, price, isChecked = false) {
     const id = value.split(` `).join(`-`);
-
     return `<div>
               <input class="point__offers-input visually-hidden" type="checkbox" id="${id}" name="offer" value="${value}" ${isChecked ? `checked` : ``}>
               <label for="${id}" class="point__offers-label">
@@ -149,31 +148,77 @@ class EditWaypoint extends Component {
   }
 
   _onChangeRadioType(evt) {
-    if (typeof this._onChangeType !== `function`) {
+    const offfers = this._element.querySelector(`.point__offers-wrap`);
+    const selectedWay = this._element.querySelector(`.travel-way__label`);
+    const totalPrice = this._element.querySelector(`.point__price input`);
+    const destinationLabel = this._element.querySelector(`.point__destination-label`);
+    const toggleDropdown = this._element.querySelector(`.travel-way__toggle `);
+    const hasKey = this._allOffers.has(evt.target.value);
+    selectedWay.textContent = TYPE_EVENTS[evt.target.value].icon;
+    destinationLabel.textContent = `${evt.target.value} ${TYPE_EVENTS[evt.target.value].add}`;
+    toggleDropdown.checked = false;
+    if (!hasKey) {
       return;
     }
-    this._onChangeType(this, evt);
+    const targetType = this._allOffers.get(evt.target.value);
+    const fragmentForOffers = document.createDocumentFragment();
+
+    totalPrice.value = this._price;
+    targetType.forEach((offer) => {
+      const offerTemplate = EventEdit._offerTemplate(offer.name, offer.price);
+      fragmentForOffers.appendChild(createElement(offerTemplate));
+    });
+    this._offers.clear();
+    targetType.forEach((offer) => {
+      this._offers.set(offer.name, {price: offer.price, isChecked: false});
+    });
+    offfers.innerHTML = ``;
+    offfers.appendChild(fragmentForOffers);
   }
 
-  _onChangeCheckboxOffers(evt) {
-    if (typeof this._onChangeOffers !== `function`) {
-      return;
+  _onChangeOffers(evt) {
+    const totalPrice = this._element.querySelector(`.point__price input`);
+    const isChecked = evt.target.checked;
+    const hasKey = this._offers.has(evt.target.value);
+    const selectedOffer = evt.target.value;
+    let getPriceOfOffer;
+
+    if (isChecked && hasKey) {
+      getPriceOfOffer = this._offers.get(selectedOffer).price;
+      totalPrice.value = +totalPrice.value + getPriceOfOffer;
+    } else {
+      getPriceOfOffer = this._offers.get(selectedOffer).price;
+      totalPrice.value = +totalPrice.value - getPriceOfOffer;
     }
-    this._onChangeOffers(this, evt);
   }
 
   _onChangeInputCity(evt) {
-    if (typeof this._onChangeCity !== `function`) {
+    const pictures = this._element.querySelector(`.point__destination-images`);
+    const description = this._element.querySelector(`.point__destination-text`);
+
+    if (!this._cities.has(evt.target.value)) {
       return;
     }
-    this._onChangeCity(this, evt);
+    const targetCity = this._cities.get(evt.target.value);
+    const fragment = document.createDocumentFragment();
+
+    description.textContent = targetCity.description;
+    this._description = targetCity.description;
+    this._photos = targetCity.pictures;
+    targetCity.pictures.forEach((picture) => {
+      fragment.appendChild(makeImage(picture.src, picture.alt, `point__destination-image`));
+    });
+    pictures.innerHTML = ``;
+    pictures.appendChild(fragment);
   }
 
-  _onFocusInputSearch(evt) {
-    if (typeof this._onSearch !== `function`) {
-      return;
+  _onFocusInputSearch() {
+    const datalist = this._element.querySelector(`datalist`);
+    const citiesFragment = document.createDocumentFragment();
+    for (let [key] of this._cities) {
+      citiesFragment.appendChild(createElement(`<option value="${key}">`));
     }
-    this._onSearch(this, evt);
+    datalist.appendChild(citiesFragment);
   }
 
   _onKeyDownEsc(evt) {
@@ -229,7 +274,7 @@ class EditWaypoint extends Component {
       return;
     }
     evt.preventDefault();
-    this._onDelete(this, this._id);
+    this._onDelete(this);
   }
 
   _processForm(formData) {
@@ -247,7 +292,7 @@ class EditWaypoint extends Component {
       photos: this._photos,
       isFavorite: false,
     };
-    const editMapper = EditWaypoint.createMapper(entry);
+    const editMapper = EventEdit.createMapper(entry);
     for (let [property, value] of formData.entries()) {
       if (editMapper[property]) {
         editMapper[property](value);
@@ -260,7 +305,7 @@ class EditWaypoint extends Component {
     this._element.querySelector(`.travel-way__select`).addEventListener(`change`, this._onChangeRadioType);
     this._element.querySelector(`.point__destination-input`).addEventListener(`focus`, this._onFocusInputSearch);
     this._element.querySelector(`.point__destination-input`).addEventListener(`change`, this._onChangeInputCity);
-    this._element.querySelector(`.point__offers-wrap`).addEventListener(`change`, this._onChangeCheckboxOffers);
+    this._element.querySelector(`.point__offers-wrap`).addEventListener(`change`, this._onChangeOffers);
     this._element.addEventListener(`submit`, this._onSubmitButtonClick);
     this._element.addEventListener(`reset`, this._onDeleteButtonClick);
     document.addEventListener(`keydown`, this._onKeyDownEsc);
@@ -271,23 +316,11 @@ class EditWaypoint extends Component {
     this._element.querySelector(`.travel-way__select`).removeEventListener(`change`, this._onChangeRadioType);
     this._element.querySelector(`.point__destination-input`).removeEventListener(`focus`, this._onFocusInputSearch);
     this._element.querySelector(`.point__destination-input`).removeEventListener(`change`, this._onChangeInputCity);
-    this._element.querySelector(`.point__offers-wrap`).removeEventListener(`change`, this._onChangeCheckboxOffers);
+    this._element.querySelector(`.point__offers-wrap`).removeEventListener(`change`, this._onChangeOffers);
     this._element.removeEventListener(`submit`, this._onSubmitButtonClick);
     this._element.removeEventListener(`reset`, this._onDeleteButtonClick);
     document.removeEventListener(`keydown`, this._onKeyDownEsc);
     this._destroyDatePickers();
-  }
-
-  set onChangeType(fn) {
-    this._onChangeType = fn;
-  }
-
-  set onSearch(fn) {
-    this._onSearch = fn;
-  }
-
-  set onChangeCity(fn) {
-    this._onChangeCity = fn;
   }
 
   set onSubmit(fn) {
@@ -302,8 +335,12 @@ class EditWaypoint extends Component {
     this._onKeyDown = fn;
   }
 
-  set onChangeOffers(fn) {
-    this._onChangeOffers = fn;
+  set offers(offers) {
+    this._allOffers = offers;
+  }
+
+  set cities(cities) {
+    this._cities = cities;
   }
 
   static createMapper(target) {
@@ -327,4 +364,4 @@ class EditWaypoint extends Component {
   }
 }
 
-export default EditWaypoint;
+export default EventEdit;

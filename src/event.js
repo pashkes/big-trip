@@ -1,11 +1,11 @@
-import {TYPE_EVENTS} from "./data";
+import {TYPE_EVENTS} from "./constants";
 import Component from "./component";
 import moment from 'moment';
 import momentDurationFormatSetup from 'moment-duration-format';
 
 momentDurationFormatSetup(moment);
 
-class Waypoint extends Component {
+class Event extends Component {
   constructor(data) {
     super();
     this._type = data.type;
@@ -30,7 +30,7 @@ class Waypoint extends Component {
     });
     return `<article class="trip-point" tabindex="0">
           <i class="trip-icon">${TYPE_EVENTS[this._type].icon}</i>
-          <h3 class="trip-point__title">${this._type} ${TYPE_EVENTS[this._type].add} ${this._city}</h3>
+          <h3 class="trip-point__title">${this._type.toLowerCase()} ${TYPE_EVENTS[this._type].add} ${this._city}</h3>
           <p class="trip-point__schedule">
             <span class="trip-point__timetable">${startDate.format(`H:mm`)} — ${endDate.format(`H:mm`)}</span>
             <span class="trip-point__duration">${this._duration}</span>
@@ -55,4 +55,4 @@ class Waypoint extends Component {
   }
 }
 
-export default Waypoint;
+export default Event;

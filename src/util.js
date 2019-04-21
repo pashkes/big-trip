@@ -4,4 +4,12 @@ const createElement = (template) => {
   return newElement.firstChild;
 };
 
-export {createElement};
+const makeImage = (src, alt, className) => {
+  const img = new Image();
+  img.src = src;
+  img.alt = alt;
+  img.classList.add(className);
+  return img;
+};
+
+export {createElement, makeImage};

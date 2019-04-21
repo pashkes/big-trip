@@ -4,8 +4,7 @@ import moment from 'moment';
 class Day extends Component {
   constructor(data) {
     super();
-
-    this._day = moment(data).format(`D`);
+    this._day = moment(data).date();
     this._monthAndYear = moment(data).format(`MMM YY`);
   }
 

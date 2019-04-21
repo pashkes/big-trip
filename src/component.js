@@ -2,6 +2,7 @@ import {createElement} from "./util";
 
 class Component {
   constructor() {
+    this._id = undefined;
     if (new.target === Component) {
       throw new Error(`Can't instantiate Component, only concrete one.`);
     }
