@@ -138,7 +138,7 @@ class EventEdit extends Component {
   }
 
   _getPhotosTemplate() {
-    return this._photos ? this._photos.map((photo) => `<img src="${photo.src}" alt="${photo.description}" class="point__destination-image">`).join(``).trim() : ``;
+    return this._photos ? this._photos.map((photo) => `<img src="${photo.src}" alt="${photo.description}" class="point__destination-image">`.trim()).join(``) : ``;
   }
 
   _onChangeRadioType(evt) {
