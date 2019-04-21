@@ -22,24 +22,33 @@ class Event extends Component {
     const startDate = moment(this._dateFrom);
     const endDate = moment(this._dateTo);
     this._duration = moment.duration(endDate.diff(startDate)).format(`DD[D] h[H] m[M]`);
-    const filteredOffers = [];
-    this._offers.forEach((item, key) => {
-      if (item.isChecked) {
-        filteredOffers.push(key);
-      }
-    });
+
     return `<article class="trip-point" tabindex="0">
           <i class="trip-icon">${TYPE_EVENTS[this._type].icon}</i>
-          <h3 class="trip-point__title">${this._type.toLowerCase()} ${TYPE_EVENTS[this._type].add} ${this._city}</h3>
+          <h3 class="trip-point__title">${this._type} ${TYPE_EVENTS[this._type].add} ${this._city}</h3>
           <p class="trip-point__schedule">
             <span class="trip-point__timetable">${startDate.format(`H:mm`)} — ${endDate.format(`H:mm`)}</span>
             <span class="trip-point__duration">${this._duration}</span>
           </p>
           <p class="trip-point__price">&euro;&nbsp;${this._price ? this._price : 0}</p>
           <ul class="trip-point__offers">
-          ${filteredOffers.map((offer) => `<li><button class="trip-point__offer">${offer}</button></li>`).join(``)}
+          ${this._getOffersTemplate()}
           </ul>
         </article>`.trim();
+  }
+
+  _getOffersNames() {
+    const filteredOffers = [];
+    this._offers.forEach((item, key) => {
+      if (item.isChecked) {
+        filteredOffers.push(key);
+      }
+    });
+    return filteredOffers;
+  }
+
+  _getOffersTemplate() {
+    return this._getOffersNames().map((offer) => `<li><button class="trip-point__offer">${offer}</button></li>`).join(``);
   }
 
   bind() {
