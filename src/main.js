@@ -26,6 +26,11 @@ const state = {
   sort: `event`,
 };
 
+const getCurrentStateEvents = () => {
+  const filtered = filterEvents(state.events, state.filter);
+  return sortEvents(filtered, state.sort);
+};
+
 const renderEvents = (events) => {
   if (events.length === 0) {
     return;
@@ -66,12 +71,9 @@ const onSubmit = (newObject, event) => {
 
   lockForm(submitBtn, deleteBtn);
   api.updateEvent({id: event.id, data: toRAW(newObject)}).then((newEvent) => {
-    const filtered = filterEvents(state.events, state.filter);
-    const sort = sortEvents(filtered, state.sort);
-
     updateDataEvent(newEvent);
-    renderEvents(sort);
-    getStatistics(filtered, updateData);
+    renderEvents(getCurrentStateEvents());
+    getStatistics(getCurrentStateEvents(), updateData);
     event.destroy();
   })
     .catch(() => {
@@ -82,11 +84,8 @@ const onSubmit = (newObject, event) => {
 
 const onKeyDownEscExit = (element, evt) => {
   if (evt.keyCode === ESC_KEY_CODE) {
-    const filtered = filterEvents(state.events, state.filter);
-    const sort = sortEvents(filtered, state.sort);
-
     element.destroy();
-    renderEvents(sort);
+    renderEvents(getCurrentStateEvents());
   }
 };
 
@@ -105,9 +104,7 @@ const onDelete = (element) => {
       if (state.events === null) {
         state.events = [];
       }
-      const filtered = filterEvents(state.events, state.filter);
-      const sort = sortEvents(filtered, state.sort);
-      renderEvents(sort);
+      renderEvents(getCurrentStateEvents());
       getStatistics(state.events, updateData);
     })
     .catch(() => {
@@ -130,10 +127,8 @@ const deleteEvent = (id) => {
   state.events.splice(removedItemIndex, 1);
 
   if (state.events.length !== 0) {
-    const filtered = filterEvents(state.events, state.filter);
-    const sort = sortEvents(filtered, state.sort);
-    renderEvents(sort);
-    getStatistics(filtered, updateData);
+    renderEvents(getCurrentStateEvents());
+    getStatistics(getCurrentStateEvents(), updateData);
   }
 };
 
@@ -176,8 +171,7 @@ const filterEvents = (events, filterType) => {
 
 const onFilter = (evt) => {
   state.filter = evt.target.value;
-  const filtered = filterEvents(state.events, state.filter);
-  renderEvents(filtered);
+  renderEvents(getCurrentStateEvents());
 };
 
 const renderFilters = (filtersOptions) => {
@@ -200,10 +194,8 @@ const createEvent = (newObject, event) => {
       state.events = [];
     }
     state.events.push(newMadeEvent);
-    const filtered = filterEvents(state.events, state.filter);
-    const sort = sortEvents(filtered, state.sort);
-    renderEvents(sort);
-    getStatistics(sort, updateData);
+    renderEvents(getCurrentStateEvents());
+    getStatistics(getCurrentStateEvents(), updateData);
     event.destroy();
   })
     .catch(() => {
@@ -249,10 +241,8 @@ const renderSorts = (sortData) => {
     const sortItem = new Sorter(item);
     sortItem.render();
     sortItem.onChange = (evt) => {
-      const filtered = filterEvents(state.events, state.filter);
       state.sort = evt.target.value;
-      const sorted = sortEvents(filtered, state.sort);
-      renderEvents(sorted);
+      renderEvents(getCurrentStateEvents());
     };
     fragment.appendChild(sortItem.element);
   }

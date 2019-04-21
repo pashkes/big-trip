@@ -133,7 +133,7 @@ class EventEdit extends Component {
   _getTravelWayTemplate(ways) {
     return ways.map((item) => {
       return `<input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-${item}" name="travel-way" value="${item}" ${this._type === item ? `checked` : ``}>
-          <label class="travel-way__select-label" for="travel-way-${name}">${TYPE_EVENTS[item].icon} ${item}</label>`.trim();
+          <label class="travel-way__select-label" for="travel-way-${item}">${TYPE_EVENTS[item].icon} ${item}</label>`.trim();
     }).join(``);
   }
 
