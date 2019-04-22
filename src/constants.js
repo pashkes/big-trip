@@ -1,7 +1,7 @@
-const AUTHORIZATION = `Basic dXNlckBwYXNzd29yiZAo=1sddd7y7ssddd7svs084`;
+const AUTHORIZATION = `Basic dXNlckBwYXNzd29yiZAo=weefwye54wew`;
 const END_POINT = `https://es8-demo-srv.appspot.com/big-trip/`;
 const ESC_KEY_CODE = 27;
-const ANIMATION_DURATION_MC = 800;
+const ANIMATION_DURATION = 800;
 const TYPE_EVENTS = {
   'taxi': {icon: `🚕`, add: `to`},
   'bus': {icon: `🚌`, add: `to`},
@@ -83,4 +83,4 @@ const SORTS = [
   },
 ];
 
-export {TYPE_EVENTS, FILTERS, STATISTICS, SORTS, AUTHORIZATION, END_POINT, ESC_KEY_CODE, ANIMATION_DURATION_MC, WAY_OF_GROUPS};
+export {TYPE_EVENTS, FILTERS, STATISTICS, SORTS, AUTHORIZATION, END_POINT, ESC_KEY_CODE, ANIMATION_DURATION, WAY_OF_GROUPS};

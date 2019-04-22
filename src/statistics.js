@@ -35,7 +35,9 @@ const getStatistics = (events, cb) => {
   STATISTICS.wasUsed.forEach((item, key) => STATISTICS.wasUsed.set(key, 0));
   STATISTICS.spentTime.forEach((item, key) => STATISTICS.spentTime.set(key, 0));
 
-  events.filter((it) => it.dateFrom.getTime() < currentDate.getTime()).forEach((item) => {
+  events.filter((it) => {
+    return it.dateFrom < currentDate;
+  }).forEach((item) => {
     if (STATISTICS.spentMoney.has(item.type)) {
       STATISTICS.spentMoney.set(item.type, STATISTICS.spentMoney.get(item.type) + item.price);
     }

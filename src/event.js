@@ -56,7 +56,7 @@ class Event extends Component {
   }
 
   unbind() {
-    this._element.removeAllListeners(`click`, this._onClick);
+    this._element.removeEventListener(`click`, this._onClick);
   }
 
   set onClick(func) {

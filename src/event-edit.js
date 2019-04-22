@@ -40,14 +40,6 @@ class EventEdit extends Component {
   }
 
   get template() {
-
-    const getOffers = () => {
-      const offers = [];
-      this._offers.forEach((item, key) => {
-        offers.push(this._getOfferTemplate(key, item.price, item.isChecked));
-      });
-      return offers.join(``);
-    };
     return `
       <article class="point animated fast">
         <form action="" method="get">
@@ -104,7 +96,7 @@ class EventEdit extends Component {
             <section class="point__offers">
               <h3 class="point__details-title">offers</h3>
               <div class="point__offers-wrap">
-                ${getOffers()}
+                ${this._getOffersNames()}
               </div>
             </section>
             <section class="point__destination">
@@ -118,6 +110,14 @@ class EventEdit extends Component {
           </section>
         </form>
       </article>`.trim();
+  }
+
+  _getOffersNames() {
+    const offers = [];
+    this._offers.forEach((item, key) => {
+      offers.push(this._getOfferTemplate(key, item.price, item.isChecked));
+    });
+    return offers.join(``);
   }
 
   _getOfferTemplate(value, price, isChecked = false) {
@@ -147,6 +147,7 @@ class EventEdit extends Component {
     const totalPrice = this._element.querySelector(`.point__price input`);
     const destinationLabel = this._element.querySelector(`.point__destination-label`);
     const toggleDropdown = this._element.querySelector(`.travel-way__toggle `);
+
     const hasKey = this._allOffers.has(evt.target.value);
     selectedWay.textContent = TYPE_EVENTS[evt.target.value].icon;
     destinationLabel.textContent = `${evt.target.value} ${TYPE_EVENTS[evt.target.value].add}`;
@@ -158,12 +159,10 @@ class EventEdit extends Component {
     const fragmentForOffers = document.createDocumentFragment();
 
     totalPrice.value = this._price;
+    this._offers.clear();
     targetType.forEach((offer) => {
       const offerTemplate = this._getOfferTemplate(offer.name, offer.price);
       fragmentForOffers.appendChild(createElement(offerTemplate));
-    });
-    this._offers.clear();
-    targetType.forEach((offer) => {
       this._offers.set(offer.name, {price: offer.price, isChecked: false});
     });
     offfers.innerHTML = ``;
@@ -260,6 +259,8 @@ class EventEdit extends Component {
     const formData = new FormData(evt.target);
     const updatedEvent = this._processForm(formData);
     updatedEvent.id = this._id;
+
+    this._lockForm();
     this._onSubmit(updatedEvent, this, evt);
   }
 
@@ -268,6 +269,7 @@ class EventEdit extends Component {
       return;
     }
     evt.preventDefault();
+    this._deletingData();
     this._onDelete(this);
   }
 
@@ -293,6 +295,22 @@ class EventEdit extends Component {
       }
     }
     return entry;
+  }
+
+  _lockForm() {
+    const submitBtn = this._element.querySelector(`.point__button--save`);
+    const deleteBtn = this._element.querySelector(`.point__button--delete`);
+    submitBtn.disabled = true;
+    deleteBtn.disabled = true;
+    submitBtn.textContent = `Saving...`;
+  }
+
+  _deletingData() {
+    const submitBtn = this._element.querySelector(`.point__button--save`);
+    const deleteBtn = this._element.querySelector(`.point__button--delete`);
+    submitBtn.disabled = true;
+    deleteBtn.disabled = true;
+    deleteBtn.textContent = `Deleting...`;
   }
 
   bind() {
