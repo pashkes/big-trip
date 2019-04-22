@@ -174,7 +174,7 @@ const filterEvents = (events, filterType) => {
     case `past`:
       return events.filter((it) => it.dateFrom.getTime() < currentDate.getTime());
     default:
-      return events;
+      return [...events];
   }
 };
 
@@ -271,7 +271,7 @@ const sortEvents = (events, sortType) => {
     case `price`:
       return sortToSpentMoney(events);
     default:
-      return events;
+      return [...events];
   }
 };
 
