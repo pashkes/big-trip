@@ -8,9 +8,9 @@ const state = {
   mode: `default`,
 };
 
-const getCurrentStateEvents = () => {
+const getStateEvents = () => {
   const filtered = filterEvents(state.events, state.filter);
   return sortEvents(filtered, state.sort);
 };
 
-export {state, getCurrentStateEvents};
+export {state, getStateEvents};

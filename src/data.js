@@ -1,5 +1,6 @@
 import API from "./api";
 import {AUTHORIZATION, END_POINT} from "./constants";
+
 const api = new API({endPoint: END_POINT, authorization: AUTHORIZATION});
 const offers = new Map();
 const citiesList = new Map();

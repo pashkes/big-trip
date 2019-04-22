@@ -6,10 +6,10 @@ import TotalCost from "./total-cost";
 import Day from "./day";
 import {getCitiesOfList, getOffersOfList} from "./data";
 import {updateData, getStatistics} from "./statistics";
-import onClickToggleModeView from "./view-mode";
+import toggleMode from "./view-mode";
 import {toRAW} from "./model-event";
 import moment from "moment";
-import {state, getCurrentStateEvents} from "./state";
+import {state, getStateEvents} from "./state";
 import {renderSorts} from "./sort-events";
 import {renderFilters} from "./filter-events";
 
@@ -58,8 +58,7 @@ const onSubmit = (newObject, component) => {
   component.lockForm();
   api.updateEvent({id: component.id, data: toRAW(newObject)}).then((newEvent) => {
     updateDataEvent(newEvent);
-    renderEvents(getCurrentStateEvents());
-    getStatistics(getCurrentStateEvents(), updateData);
+    renderEvents(getStateEvents());
     component.destroy();
     if (state.mode === `creating`) {
       newEventBtn.disabled = !newEventBtn.disabled;
@@ -81,8 +80,7 @@ const onDelete = (component) => {
       if (state.events === null) {
         state.events = [];
       }
-      renderEvents(getCurrentStateEvents());
-      getStatistics(state.events, updateData);
+      renderEvents(getStateEvents());
     })
     .catch(() => {
       component.unlockForm();
@@ -94,7 +92,7 @@ const onDelete = (component) => {
 const onKeyDownEscExit = (element, evt) => {
   if (evt.keyCode === ESC_KEY_CODE) {
     element.destroy();
-    renderEvents(getCurrentStateEvents());
+    renderEvents(getStateEvents());
     if (state.mode === `creating`) {
       newEventBtn.disabled = !newEventBtn.disabled;
       state.mode = `default`;
@@ -111,8 +109,7 @@ const deleteEvent = (id) => {
   const removedItemIndex = state.events.findIndex((item) => item.id === id);
   state.events.splice(removedItemIndex, 1);
   if (state.events.length !== 0) {
-    renderEvents(getCurrentStateEvents());
-    getStatistics(getCurrentStateEvents(), updateData);
+    renderEvents(getStateEvents());
   }
 };
 
@@ -120,8 +117,7 @@ const createEvent = (newObject, component) => {
   component.lockForm();
   api.createEvent(toRAW(newObject)).then((newMadeEvent) => {
     state.events.push(newMadeEvent);
-    renderEvents(getCurrentStateEvents());
-    getStatistics(getCurrentStateEvents(), updateData);
+    renderEvents(getStateEvents());
     component.destroy();
     newEventBtn.disabled = !newEventBtn.disabled;
     state.mode = `default`;
@@ -151,21 +147,26 @@ const newEventClickHandler = (evt) => {
   window.scrollTo(0, 0);
 };
 
+const getPoints = () => {
+  points.innerHTML = `Loading route...`;
+  api.getPoints()
+    .then((events) => {
+      if (events.length === 0) {
+        points.innerHTML = ``;
+      } else {
+        renderEvents(events);
+        state.events = events;
+        getStatistics(events, updateData);
+      }
+    })
+    .catch(() => {
+      points.innerHTML = `Something went wrong while loading your route info. Check your connection or try again later`;
+    });
+};
+
 newEventBtn.addEventListener(`click`, newEventClickHandler);
-onClickToggleModeView();
+toggleMode();
 renderFilters(FILTERS, renderEvents);
 renderSorts(SORTS, renderEvents);
-points.innerHTML = `Loading route...`;
-api.getPoints()
-  .then((events) => {
-    if (events.length === 0) {
-      points.innerHTML = ``;
-    } else {
-      renderEvents(events);
-      state.events = events;
-      getStatistics(events, updateData);
-    }
-  })
-  .catch(() => {
-    points.innerHTML = `Something went wrong while loading your route info. Check your connection or try again later`;
-  });
+getPoints();
+

@@ -1,5 +1,5 @@
 import Sorter from "./sorter";
-import {state, getCurrentStateEvents} from "./state";
+import {state, getStateEvents} from "./state";
 
 const tripSorting = document.querySelector(`.trip-sorting`);
 const sortToTime = (events) => {
@@ -22,7 +22,7 @@ const renderSorts = (sortData, cb) => {
     sortItem.render();
     sortItem.onChange = (evt) => {
       state.sort = evt.target.value;
-      cb(getCurrentStateEvents());
+      cb(getStateEvents());
     };
     fragment.appendChild(sortItem.element);
   }

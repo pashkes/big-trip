@@ -1,5 +1,5 @@
 import Filter from "./filter";
-import {state, getCurrentStateEvents} from "./state";
+import {state, getStateEvents} from "./state";
 
 const listOfFilter = document.querySelector(`.trip-filter`);
 
@@ -29,7 +29,7 @@ const renderFilters = (filtersOptions, cb) => {
     filter.render();
     filter.onFilter = (evt) => {
       state.filter = evt.target.value;
-      cb(getCurrentStateEvents());
+      cb(getStateEvents());
     };
     fragment.appendChild(filter.element);
   }
