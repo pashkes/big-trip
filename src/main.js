@@ -1,4 +1,4 @@
-import {FILTERS, SORTS, AUTHORIZATION, END_POINT, ESC_KEY_CODE, ANIMATION_DURATION} from "./constants";
+import {FILTERS, SORTS, AUTHORIZATION, END_POINT, ESC_KEY_CODE} from "./constants";
 import Event from "./event";
 import EventEdit from "./event-edit";
 import API from "./api";
@@ -36,45 +36,9 @@ const renderEvents = (events) => {
       const event = new Event(item);
       const eventEdit = new EventEdit(item);
       event.onClick = () => {
-        eventEdit.onSubmit = (newObject) => {
-          const submitBtn = eventEdit.element.querySelector(`.point__button--save`);
-          const deleteBtn = eventEdit.element.querySelector(`.point__button--delete`);
-          api.updateEvent({id: eventEdit.id, data: toRAW(newObject)}).then((newEvent) => {
-            updateDataEvent(newEvent);
-            renderEvents(getCurrentStateEvents());
-            getStatistics(getCurrentStateEvents(), updateData);
-            eventEdit.destroy();
-            if (state.mode === `creating`) {
-              newEventBtn.disabled = !newEventBtn.disabled;
-              state.mode = `default`;
-            }
-          })
-            .catch(() => {
-              unlockForm(submitBtn, deleteBtn);
-              initErrorForm(event.element);
-            });
-        };
+        eventEdit.onSubmit = onSubmit;
         eventEdit.onKeyDownEscExit = onKeyDownEscExit;
-        eventEdit.onDelete = () => {
-          const submitBtn = eventEdit.element.querySelector(`.point__button--save`);
-          const deleteBtn = eventEdit.element.querySelector(`.point__button--delete`);
-          api.deleteEvent({id: eventEdit.id})
-            .then(() => api.getOffers())
-            .then(() => {
-              deleteEvent(eventEdit.id);
-              eventEdit.destroy();
-              if (state.events === null) {
-                state.events = [];
-              }
-              renderEvents(getCurrentStateEvents());
-              getStatistics(state.events, updateData);
-            })
-            .catch(() => {
-              unlockForm(submitBtn, deleteBtn);
-              initErrorForm(eventEdit.element);
-            });
-          newEventBtn.disabled = false;
-        };
+        eventEdit.onDelete = onDelete;
         eventEdit.cities = cities;
         eventEdit.offers = offers;
         eventEdit.render();
@@ -90,6 +54,43 @@ const renderEvents = (events) => {
   header.appendChild(totalCost.render());
 };
 
+const onSubmit = (newObject, component) => {
+  component.lockForm();
+  api.updateEvent({id: component.id, data: toRAW(newObject)}).then((newEvent) => {
+    updateDataEvent(newEvent);
+    renderEvents(getCurrentStateEvents());
+    getStatistics(getCurrentStateEvents(), updateData);
+    component.destroy();
+    if (state.mode === `creating`) {
+      newEventBtn.disabled = !newEventBtn.disabled;
+      state.mode = `default`;
+    }
+  })
+    .catch(() => {
+      component.unlockForm();
+      component.initErrorForm();
+    });
+};
+
+const onDelete = (component) => {
+  api.deleteEvent({id: component.id})
+    .then(() => api.getOffers())
+    .then(() => {
+      deleteEvent(component.id);
+      component.destroy();
+      if (state.events === null) {
+        state.events = [];
+      }
+      renderEvents(getCurrentStateEvents());
+      getStatistics(state.events, updateData);
+    })
+    .catch(() => {
+      component.unlockForm();
+      component.initErrorForm();
+    });
+  newEventBtn.disabled = false;
+};
+
 const onKeyDownEscExit = (element, evt) => {
   if (evt.keyCode === ESC_KEY_CODE) {
     element.destroy();
@@ -100,7 +101,6 @@ const onKeyDownEscExit = (element, evt) => {
     }
   }
 };
-
 
 const updateDataEvent = (newEvent) => {
   const updatedItemIndex = state.events.findIndex((item) => item.id === newEvent.id);
@@ -116,39 +116,19 @@ const deleteEvent = (id) => {
   }
 };
 
-const unlockForm = (submitBtn, deleteBtn) => {
-  submitBtn.textContent = `Save`;
-  deleteBtn.textContent = `Delete`;
-  submitBtn.disabled = false;
-  deleteBtn.disabled = false;
-};
-
-const initErrorForm = (form) => {
-  form.classList.add(`jello`);
-  form.classList.add(`error`);
-  setTimeout(() => {
-    form.classList.remove(`jello`);
-    form.classList.remove(`error`);
-  }, ANIMATION_DURATION);
-};
-
-const createEvent = (newObject, event) => {
-  const submitBtn = event.element.querySelector(`.point__button--save`);
-  const deleteBtn = event.element.querySelector(`.point__button--delete`);
+const createEvent = (newObject, component) => {
+  component.lockForm();
   api.createEvent(toRAW(newObject)).then((newMadeEvent) => {
-    if (state.events === null) {
-      state.events = [];
-    }
     state.events.push(newMadeEvent);
     renderEvents(getCurrentStateEvents());
     getStatistics(getCurrentStateEvents(), updateData);
-    event.destroy();
+    component.destroy();
     newEventBtn.disabled = !newEventBtn.disabled;
     state.mode = `default`;
   })
     .catch(() => {
-      unlockForm(submitBtn, deleteBtn);
-      initErrorForm(event.element);
+      component.unlockForm();
+      component.initErrorForm();
     });
 };
 

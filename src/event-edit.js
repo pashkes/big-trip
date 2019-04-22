@@ -1,4 +1,4 @@
-import {TYPE_EVENTS, WAY_OF_GROUPS} from "./constants";
+import {ANIMATION_DURATION, TYPE_EVENTS, WAY_OF_GROUPS} from "./constants";
 import Component from "./component";
 import flatpickr from "flatpickr";
 import {createElement, makeImage} from "./util";
@@ -259,9 +259,7 @@ class EventEdit extends Component {
     const formData = new FormData(evt.target);
     const updatedEvent = this._processForm(formData);
     updatedEvent.id = this._id;
-
-    this._lockForm();
-    this._onSubmit(updatedEvent, this, evt);
+    this._onSubmit(updatedEvent, this);
   }
 
   _onDeleteButtonClick(evt) {
@@ -297,14 +295,6 @@ class EventEdit extends Component {
     return entry;
   }
 
-  _lockForm() {
-    const submitBtn = this._element.querySelector(`.point__button--save`);
-    const deleteBtn = this._element.querySelector(`.point__button--delete`);
-    submitBtn.disabled = true;
-    deleteBtn.disabled = true;
-    submitBtn.textContent = `Saving...`;
-  }
-
   _deletingData() {
     const submitBtn = this._element.querySelector(`.point__button--save`);
     const deleteBtn = this._element.querySelector(`.point__button--delete`);
@@ -333,6 +323,32 @@ class EventEdit extends Component {
     this._element.removeEventListener(`reset`, this._onDeleteButtonClick);
     document.removeEventListener(`keydown`, this._onKeyDownEsc);
     this._destroyDatePickers();
+  }
+
+  lockForm() {
+    const submitBtn = this._element.querySelector(`.point__button--save`);
+    const deleteBtn = this._element.querySelector(`.point__button--delete`);
+    submitBtn.disabled = true;
+    deleteBtn.disabled = true;
+    submitBtn.textContent = `Saving...`;
+  }
+
+  unlockForm() {
+    const submitBtn = this._element.querySelector(`.point__button--save`);
+    const deleteBtn = this._element.querySelector(`.point__button--delete`);
+    submitBtn.textContent = `Save`;
+    deleteBtn.textContent = `Delete`;
+    submitBtn.disabled = false;
+    deleteBtn.disabled = false;
+  }
+
+  initErrorForm() {
+    this._element.classList.add(`jello`);
+    this._element.classList.add(`error`);
+    setTimeout(() => {
+      this._element.classList.remove(`jello`);
+      this._element.classList.remove(`error`);
+    }, ANIMATION_DURATION);
   }
 
   set onSubmit(fn) {

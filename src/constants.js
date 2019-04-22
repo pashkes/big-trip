@@ -1,4 +1,4 @@
-const AUTHORIZATION = `Basic dXNlckBwYXNzd29yiZAo=weefwye54wew`;
+const AUTHORIZATION = `Basic dXNlckBwYXNzd29yiZAo=weefw50ye54wew`;
 const END_POINT = `https://es8-demo-srv.appspot.com/big-trip/`;
 const ESC_KEY_CODE = 27;
 const ANIMATION_DURATION = 800;
