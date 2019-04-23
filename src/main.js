@@ -89,9 +89,9 @@ const onDelete = (component) => {
   newEventBtn.disabled = false;
 };
 
-const onKeyDownEscExit = (element, evt) => {
+const onKeyDownEscExit = (component, evt) => {
   if (evt.keyCode === ESC_KEY_CODE) {
-    element.destroy();
+    component.destroy();
     renderEvents(getStateEvents());
     if (state.mode === `creating`) {
       newEventBtn.disabled = !newEventBtn.disabled;
