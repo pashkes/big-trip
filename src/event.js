@@ -44,7 +44,7 @@ class Event extends Component {
         filteredOffers.push(key);
       }
     });
-    return filteredOffers;
+    return filteredOffers.reverse().splice(-2).reverse();
   }
 
   _getOffersTemplate() {
