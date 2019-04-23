@@ -174,14 +174,13 @@ class EventEdit extends Component {
     const isChecked = evt.target.checked;
     const hasKey = this._offers.has(evt.target.value);
     const selectedOffer = evt.target.value;
-    let getPriceOfOffer;
+    const priceOfOffer = this._offers.get(selectedOffer).price;
+    const prevValue = Number(totalPrice.value);
 
     if (isChecked && hasKey) {
-      getPriceOfOffer = this._offers.get(selectedOffer).price;
-      totalPrice.value = +totalPrice.value + getPriceOfOffer;
+      totalPrice.value = prevValue + priceOfOffer;
     } else {
-      getPriceOfOffer = this._offers.get(selectedOffer).price;
-      totalPrice.value = +totalPrice.value - getPriceOfOffer;
+      totalPrice.value = prevValue - priceOfOffer;
     }
   }
 

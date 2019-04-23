@@ -14,12 +14,7 @@ class TotalCost extends Component {
     if (events.length === 1) {
       return events[0].price;
     }
-    return events.reduce((a, c) => {
-      if (Number.isInteger(a.price)) {
-        return a.price + c.price;
-      }
-      return a + c.price;
-    });
+    return events.reduce((a, c) => a + c.price, 0);
   }
 }
 
