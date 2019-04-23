@@ -1,7 +1,7 @@
 import {getStatistics, updateData} from "./statistics";
 import {state} from "./state";
 
-const viewMode = document.querySelectorAll(`.view-switch__item`);
+const viewItems = document.querySelectorAll(`.view-switch__item`);
 
 const buttonClickToggleModeHandler = (evt) => {
   const target = evt.target;
@@ -23,7 +23,7 @@ const buttonClickToggleModeHandler = (evt) => {
 };
 
 const toggleMode = () => {
-  viewMode.forEach((item) => {
+  viewItems.forEach((item) => {
     item.addEventListener(`click`, buttonClickToggleModeHandler);
   });
 };

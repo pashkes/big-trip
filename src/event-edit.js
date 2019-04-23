@@ -155,12 +155,12 @@ class EventEdit extends Component {
     if (!hasKey) {
       return;
     }
-    const targetType = this._allOffers.get(evt.target.value);
+    const targetTypes = this._allOffers.get(evt.target.value);
     const fragmentForOffers = document.createDocumentFragment();
 
     totalPrice.value = this._price;
     this._offers.clear();
-    targetType.forEach((offer) => {
+    targetTypes.forEach((offer) => {
       const offerTemplate = this._getOfferTemplate(offer.name, offer.price);
       fragmentForOffers.appendChild(createElement(offerTemplate));
       this._offers.set(offer.name, {price: offer.price, isChecked: false});

@@ -20,8 +20,8 @@ const WAY_OF_GROUPS = {
   PLACES: [`check-in`, `sightseeing`, `restaurant`],
 };
 
-const STATISTICS = {
-  spentMoney: new Map([
+const STATISTIC = {
+  spentMoneyTypes: new Map([
     [`flight`, 0],
     [`check-in`, 0],
     [`taxi`, 0],
@@ -32,7 +32,7 @@ const STATISTICS = {
     [`train`, 0],
     [`bus`, 0],
   ]),
-  wasUsed: new Map([
+  wasUsedTypes: new Map([
     [`drive`, 0],
     [`taxi`, 0],
     [`flight`, 0],
@@ -40,7 +40,7 @@ const STATISTICS = {
     [`train`, 0],
     [`bus`, 0],
   ]),
-  spentTime: new Map([
+  spentTimeTypes: new Map([
     [`flight`, 0],
     [`check-in`, 0],
     [`taxi`, 0],
@@ -83,4 +83,4 @@ const SORTS = [
   },
 ];
 
-export {TYPE_EVENTS, FILTERS, STATISTICS, SORTS, AUTHORIZATION, END_POINT, ESC_KEY_CODE, ANIMATION_DURATION, WAY_OF_GROUPS};
+export {TYPE_EVENTS, FILTERS, STATISTIC, SORTS, AUTHORIZATION, END_POINT, ESC_KEY_CODE, ANIMATION_DURATION, WAY_OF_GROUPS};

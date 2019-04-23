@@ -14,10 +14,10 @@ const sortToSpentMoney = (events) => {
   return events.sort((current, next) => current.price - next.price);
 };
 
-const renderSorts = (sortData, cb) => {
+const renderSorts = (sortstData, cb) => {
   const fragment = document.createDocumentFragment();
 
-  for (let item of sortData) {
+  for (let item of sortstData) {
     const sortItem = new Sorter(item);
     sortItem.render();
     sortItem.onChange = (evt) => {

@@ -1,6 +1,6 @@
 import Chart from "chart.js";
 import ChartDataLabels from "chartjs-plugin-datalabels";
-import {STATISTICS} from "./constants";
+import {STATISTIC} from "./constants";
 import moment from 'moment';
 import momentDurationFormatSetup from "moment-duration-format";
 momentDurationFormatSetup(moment);
@@ -16,13 +16,13 @@ timeSpendCtx.height = BAR_HEIGHT * 9;
 
 const updateData = (data) => {
   moneyChart.data.datasets.forEach((it) => {
-    it.data = [...data.spentMoney.values()];
+    it.data = [...data.spentMoneyTypes.values()];
   });
   transportChart.data.datasets.forEach((it) => {
-    it.data = [...data.wasUsed.values()];
+    it.data = [...data.wasUsedTypes.values()];
   });
   timeSpendChart.data.datasets.forEach((it) => {
-    it.data = [...data.spentTime.values()];
+    it.data = [...data.spentTimeTypes.values()];
   });
   moneyChart.update();
   transportChart.update();
@@ -31,25 +31,25 @@ const updateData = (data) => {
 
 const getStatistics = (events, cb) => {
   const currentDate = new Date();
-  STATISTICS.spentMoney.forEach((item, key) => STATISTICS.spentMoney.set(key, 0));
-  STATISTICS.wasUsed.forEach((item, key) => STATISTICS.wasUsed.set(key, 0));
-  STATISTICS.spentTime.forEach((item, key) => STATISTICS.spentTime.set(key, 0));
+  STATISTIC.spentMoneyTypes.forEach((item, key) => STATISTIC.spentMoneyTypes.set(key, 0));
+  STATISTIC.wasUsedTypes.forEach((item, key) => STATISTIC.wasUsedTypes.set(key, 0));
+  STATISTIC.spentTimeTypes.forEach((item, key) => STATISTIC.spentTimeTypes.set(key, 0));
 
   events.filter((it) => {
     return it.dateFrom < currentDate;
   }).forEach((item) => {
-    if (STATISTICS.spentMoney.has(item.type)) {
-      STATISTICS.spentMoney.set(item.type, STATISTICS.spentMoney.get(item.type) + item.price);
+    if (STATISTIC.spentMoneyTypes.has(item.type)) {
+      STATISTIC.spentMoneyTypes.set(item.type, STATISTIC.spentMoneyTypes.get(item.type) + item.price);
     }
-    if (STATISTICS.wasUsed.has(item.type)) {
-      STATISTICS.wasUsed.set(item.type, STATISTICS.wasUsed.get(item.type) + 1);
+    if (STATISTIC.wasUsedTypes.has(item.type)) {
+      STATISTIC.wasUsedTypes.set(item.type, STATISTIC.wasUsedTypes.get(item.type) + 1);
     }
-    if (STATISTICS.spentTime.has(item.type)) {
+    if (STATISTIC.spentTimeTypes.has(item.type)) {
       const spentTime = Math.floor(moment.duration(moment(item.dateTo).diff(item.dateFrom)) / 1000 / 60 / 60);
-      STATISTICS.spentTime.set(item.type, STATISTICS.spentTime.get(item.type) + spentTime);
+      STATISTIC.spentTimeTypes.set(item.type, STATISTIC.spentTimeTypes.get(item.type) + spentTime);
     }
   });
-  cb(STATISTICS);
+  cb(STATISTIC);
 };
 
 const moneyChart = new Chart(moneyCtx, {
