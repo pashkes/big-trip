@@ -45,7 +45,7 @@ const getStatistics = (events, cb) => {
       STATISTICS.wasUsed.set(item.type, STATISTICS.wasUsed.get(item.type) + 1);
     }
     if (STATISTICS.spentTime.has(item.type)) {
-      const spentTime = moment.duration(moment(item.dateTo).diff(item.dateFrom)).hours();
+      const spentTime = Math.floor(moment.duration(moment(item.dateTo).diff(item.dateFrom)) / 1000 / 60 / 60);
       STATISTICS.spentTime.set(item.type, STATISTICS.spentTime.get(item.type) + spentTime);
     }
   });
@@ -56,7 +56,7 @@ const moneyChart = new Chart(moneyCtx, {
   plugins: [ChartDataLabels],
   type: `horizontalBar`,
   data: {
-    labels: [`✈️FLY`, `🏨 STAY`, `🚗 DRIVE`, `🏛️ LOOK`, `🍴 EAT`, `🚕 RIDE`, `🛳️ SAIL`, `🚂 TRAIN`, `🚌 BUS`],
+    labels: [`✈️FLY`, `🏨 STAY`, `🚕 TAXI`, `🏛️ LOOK`, `🍴 EAT`, `🚗 DRIVE`, `🛳️ SAIL`, `🚂 TRAIN`, `🚌 BUS`],
     datasets: [{
       data: [],
       backgroundColor: `#ffffff`,
@@ -186,7 +186,7 @@ const timeSpendChart = new Chart(timeSpendCtx, {
   plugins: [ChartDataLabels],
   type: `horizontalBar`,
   data: {
-    labels: [`✈️AIRCRAFT`, `🏨 HOTEL`, `🚗 DRIVE`, `🏛️ LOOK`, `🍴 RESTAURANTS`, `🚕 RIDE`, `🛳️ SHIP`, `🚂 TRAIN`, `🚌 BUS`],
+    labels: [`✈️AIRCRAFT`, `🏨 HOTEL`, `🚕 TAXI`, `🏛️ LOOK`, `🍴 RESTAURANTS`, `🚗 DRIVE`, `🛳️ SHIP`, `🚂 TRAIN`, `🚌 BUS`],
     datasets: [{
       data: [],
       backgroundColor: `#ffffff`,
