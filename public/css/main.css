@@ -7,7 +7,7 @@
   --text-color: #000;
   --text-color-contrast: #fff;
 
-  --color-blue:#0D8AE4;
+  --color-blue: #0D8AE4;
 }
 
 
@@ -36,9 +36,12 @@ a:hover {
 
 
 .header {
+  position: sticky;
+  top: 0;
   background: var(--color-blue);
   color: var(--text-color-contrast);
   height: 160px;
+  z-index: 1;
 }
 
 .header__wrap {
@@ -156,6 +159,7 @@ a.view-switch__item--active:link {
   text-transform: uppercase;
   cursor: pointer;
 }
+
 .trip-filter__item:hover {
   opacity: 0.5;
 }
@@ -187,9 +191,19 @@ input[type=radio]:checked + .trip-filter__item {
   opacity: 0.8;
 }
 
+.trip-controls__new-event:disabled,
+.trip-controls__new-event:disabled:hover {
+  cursor: not-allowed;
+  opacity: 1;
+}
+
+.trip-controls__new-event:disabled {
+  background-color: #C1C1C1;
+}
 
 .trip-sorting {
   box-sizing: border-box;
+  display: flex;
   margin-top: 24px;
   padding-left: 160px;
 }
@@ -237,6 +251,7 @@ input[type=radio]:checked + .trip-sorting__item {
 .trip-sorting__item--offers {
   cursor: inherit;
 }
+
 .trip-sorting__item--offers:hover {
   opacity: 1;
 }
@@ -247,7 +262,7 @@ input[type=radio]:checked + .trip-sorting__item {
 }
 
 .trip-day__info {
-  flex-basis: 48px;
+  flex-basis: 62px;
   flex-grow: 0;
   flex-shrink: 0;
   margin-right: 15px;
@@ -341,7 +356,7 @@ input[type=radio]:checked + .trip-sorting__item {
   list-style: none;
   margin: 0;
   padding: 0;
-  width: 230px;
+  min-width: 230px;
 }
 
 .trip-point__offer {
@@ -377,31 +392,37 @@ input[type=radio]:checked + .trip-sorting__item {
   margin-top: 40px;
   margin-bottom: 30px;
 }
+
 .trip-points > .point .point__date {
-  display: flex;
+  /*display: flex;*/
 }
+
 .trip-points > .point .point__input {
- border-bottom: 1px solid #0D8AE4;
+  border-bottom: 1px solid #0D8AE4;
 }
+
 .point {
   padding: 15px 0;
   background-color: #ffffff;
   border-radius: 23px;
-  box-shadow: 0 11px 20px 0 rgba(0,0,0,0.22);
+  box-shadow: 0 11px 20px 0 rgba(0, 0, 0, 0.22);
   margin-bottom: 60px;
   transition: .5s ease-out;
 }
+
 .point__header {
   display: flex;
   align-items: center;
   padding: 0 15px;
 }
+
 .point__date {
   display: none;
   font-size: 0;
   width: 55px;
   margin-right: 5px;
 }
+
 .point__input {
   font-size: 14px;
   border: 0;
@@ -414,12 +435,15 @@ input[type=radio]:checked + .trip-sorting__item {
   text-transform: uppercase;
   font-weight: normal;
 }
+
 .point__input::placeholder {
   font-weight: 100;
 }
+
 .point__input:hover {
   opacity: 0.6;
 }
+
 .point__destination-wrap {
   position: relative;
   padding: 0 2px 6px;
@@ -440,6 +464,7 @@ input[type=radio]:checked + .trip-sorting__item {
   color: #999999;
   white-space: nowrap;
 }
+
 .point__destination-input {
   border: 0;
   padding: 0;
@@ -447,18 +472,22 @@ input[type=radio]:checked + .trip-sorting__item {
   display: flex;
   width: 100%;
 }
+
 .point__destination-input::-webkit-calendar-picker-indicator {
   display: none;
 }
+
 .point__time {
   font-size: 0;
   width: 130px;
   margin-right: 40px;
   display: flex;
 }
+
 .point__time .point__input {
   font-size: 17px;
 }
+
 .point__price {
   display: flex;
   font-size: 0;
@@ -467,6 +496,7 @@ input[type=radio]:checked + .trip-sorting__item {
   position: relative;
   margin-right: 30px;
 }
+
 .point__price-currency {
   font-size: 17px;
   position: absolute;
@@ -475,16 +505,20 @@ input[type=radio]:checked + .trip-sorting__item {
   left: 5px;
   top: 3px;
 }
+
 .point__price .point__input {
   font-size: 17px;
   padding-left: 23px;
 }
+
 .travel-way {
   position: relative;
 }
+
 .point__buttons {
   display: flex;
 }
+
 .point__button {
   display: flex;
   border: 0;
@@ -494,25 +528,31 @@ input[type=radio]:checked + .trip-sorting__item {
   cursor: pointer;
   background-color: transparent;
 }
+
 .point__button:disabled,
-.point__button:disabled:hover{
+.point__button:disabled:hover {
   cursor: not-allowed;
   opacity: .7;
 }
+
 .point__button:hover {
   opacity: 0.8;
 }
+
 .point__button--save {
   background-color: #0D8AE4;
   color: #ffffff;
 }
+
 .point__button:not(:last-of-type) {
   margin-right: 5px;
 }
+
 .paint__favorite-wrap {
   margin-left: auto;
   margin-right: 40px;
 }
+
 .point__favorite {
   font-size: 0;
   display: flex;
@@ -521,27 +561,33 @@ input[type=radio]:checked + .trip-sorting__item {
   background: url("../img/star.svg") no-repeat;
   cursor: pointer;
 }
+
 .point__favorite:hover {
   opacity: 0.7;
 }
+
 .point__favorite-input:checked + .point__favorite {
   background-image: url("../img/star--check.svg");
 }
+
 .point__details {
   margin-top: 10px;
   padding: 0 15px;
   border-top: 2px solid #FFD054;
 }
+
 .point__details-title {
   font-size: 14px;
   color: #FFB900;
   text-transform: uppercase;
   margin: 15px 0;
 }
+
 .point__offers-wrap {
   display: flex;
   flex-wrap: wrap;
 }
+
 .point__offers-label {
   display: inline-flex;
   padding: 20px 30px;
@@ -551,17 +597,21 @@ input[type=radio]:checked + .trip-sorting__item {
   margin-bottom: 6px;
   cursor: pointer;
 }
+
 .point__offers-label:hover {
   opacity: 0.8;
 }
+
 .point__offers-input:checked + .point__offers-label {
   background-color: #0D8AE4;
   color: #ffffff;
 }
+
 .point__destination-text {
   width: 550px;
   font-size: 15px;
 }
+
 .point__destination-images {
   overflow-x: auto;
   overflow-y: hidden;
@@ -569,6 +619,7 @@ input[type=radio]:checked + .trip-sorting__item {
   white-space: nowrap;
   height: 150px;
 }
+
 .point__destination-image {
   display: inline-flex;
   border-radius: 10px;
@@ -576,6 +627,7 @@ input[type=radio]:checked + .trip-sorting__item {
   height: 100%;
   max-width: 100%;
 }
+
 .point__offer-service {
   padding-right: 5px;
 }
@@ -592,9 +644,11 @@ input[type=radio]:checked + .trip-sorting__item {
   cursor: pointer;
   margin-right: 17px;
 }
+
 .travel-way__label:hover {
   opacity: 0.8;
 }
+
 .travel-way__select {
   display: none;
   position: absolute;
@@ -603,37 +657,45 @@ input[type=radio]:checked + .trip-sorting__item {
   top: 51px;
   width: 176px;
   background-color: #ffffff;
-  box-shadow: 0 11px 20px 0 rgba(0,0,0,0.22);
+  box-shadow: 0 11px 20px 0 rgba(0, 0, 0, 0.22);
   border-radius: 4px;
-  border: 1px solid rgba(151,151,151,0.17);
+  border: 1px solid rgba(151, 151, 151, 0.17);
 }
+
 .travel-way__select-group {
   display: flex;
   flex-direction: column;
   padding: 15px 0;
 }
+
 .travel-way__select-group:not(:last-of-type) {
-  border-bottom: 1px solid rgba(151,151,151,0.33);
+  border-bottom: 1px solid rgba(151, 151, 151, 0.33);
 }
+
 .travel-way__select-label {
   padding-left: 32px;
   padding-top: 5px;
   padding-bottom: 5px;
   text-transform: capitalize;
 }
+
 .travel-way__select-label:not(:last-of-type) {
   margin-bottom: 15px;
 }
+
 .travel-way__select-label:hover {
   background-color: #FFD054;
   opacity: 0.8;
 }
+
 .travel-way__select-input:checked + .travel-way__select-label {
   background-color: #FFD054;
 }
+
 .travel-way__select-input:checked .travel-way__select-label:hover {
   opacity: 1;
 }
+
 .travel-way__toggle:checked + .travel-way__select {
   display: block;
 }
@@ -641,10 +703,12 @@ input[type=radio]:checked + .trip-sorting__item {
 .statistic {
   padding: 50px 0;
 }
+
 .statistic__item {
   margin-bottom: 95px;
   width: 900px;
 }
+
 @keyframes jello {
   from,
   11.1%,
@@ -697,10 +761,21 @@ input[type=radio]:checked + .trip-sorting__item {
 .error {
   box-shadow: 0 11px 20px 0 rgb(221, 40, 40);
 }
+
 .animated {
   animation-duration: 1s;
   animation-fill-mode: both;
 }
+
 .animated.fast {
   animation-duration: 800ms;
+}
+
+.editing.point .point__button--delete {
+  display: none;
+}
+.trip-point:focus {
+  outline: none;
+  box-shadow: 0 0 0 20px #EEEEEE, 0 0 0 22px #0D8AE4;
+  border-radius: 2px;
 }
