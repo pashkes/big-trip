@@ -37961,7 +37961,7 @@ const Method = {
 };
 
 const checkStatus = (response) => {
-  if (response.status >= 200 && response.status < 300) {
+  if (response.ok) {
     return response;
   } else {
     throw new Error(`${response.status}: ${response.statusText}`);
@@ -37986,23 +37986,23 @@ class API {
   getPoints() {
     return this._load({url: `points`})
       .then(toJSON)
-      .then(_model_event__WEBPACK_IMPORTED_MODULE_0__["default"].parseEvents);
+      .then(_model_event__WEBPACK_IMPORTED_MODULE_0__["ModelEvent"].parseEvents);
   }
 
   getDestination() {
     return this._load({url: `destinations`})
       .then(toJSON);
   }
-  // пока еще не используется
-  createEvent({event}) {
+
+  createEvent(event) {
     return this._load({
       url: `points`,
       method: Method.POST,
       body: JSON.stringify(event),
-      headers: new Headers({'Content-Type': `application/json`})
+      headers: new Headers({'Content-Type': `application/json`}),
     })
       .then(toJSON)
-      .then(_model_event__WEBPACK_IMPORTED_MODULE_0__["default"].parseEvents);
+      .then(_model_event__WEBPACK_IMPORTED_MODULE_0__["ModelEvent"].parseEvent);
   }
 
   updateEvent({id, data}) {
@@ -38010,10 +38010,10 @@ class API {
       url: `points/${id}`,
       method: Method.PUT,
       body: JSON.stringify(data),
-      headers: new Headers({'Content-Type': `application/json`})
+      headers: new Headers({'Content-Type': `application/json`}),
     })
       .then(toJSON)
-      .then(_model_event__WEBPACK_IMPORTED_MODULE_0__["default"].parseEvent);
+      .then(_model_event__WEBPACK_IMPORTED_MODULE_0__["ModelEvent"].parseEvent);
   }
 
   deleteEvent({id}) {
@@ -38026,7 +38026,6 @@ class API {
     return fetch(`${this._endPoint}/${url}`, {method, body, headers})
       .then(checkStatus)
       .catch((err) => {
-        // console.error(`fetch error: ${err}`);
         throw err;
       });
   }
@@ -38061,13 +38060,6 @@ class Component {
     throw new Error(`You have to define template.`);
   }
 
-  get id() {
-    if (this._id === undefined) {
-      throw new Error(`You have to define template.`);
-    }
-    return this._id;
-  }
-
   render() {
     this._element = Object(_util__WEBPACK_IMPORTED_MODULE_0__["createElement"])(this.template);
     this.bind();
@@ -38096,69 +38088,106 @@ class Component {
 
 /***/ }),
 
-/***/ "./src/data.js":
-/*!*********************!*\
-  !*** ./src/data.js ***!
-  \*********************/
-/*! exports provided: TYPE_EVENTS, filters, STATISTICS */
+/***/ "./src/constants.js":
+/*!**************************!*\
+  !*** ./src/constants.js ***!
+  \**************************/
+/*! exports provided: TYPE_EVENTS, FILTERS, STATISTIC, SORTS, AUTHORIZATION, END_POINT, ESC_KEY_CODE, ANIMATION_DURATION, WAY_OF_GROUPS */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "TYPE_EVENTS", function() { return TYPE_EVENTS; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "filters", function() { return filters; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "STATISTICS", function() { return STATISTICS; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "FILTERS", function() { return FILTERS; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "STATISTIC", function() { return STATISTIC; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "SORTS", function() { return SORTS; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "AUTHORIZATION", function() { return AUTHORIZATION; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "END_POINT", function() { return END_POINT; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ESC_KEY_CODE", function() { return ESC_KEY_CODE; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ANIMATION_DURATION", function() { return ANIMATION_DURATION; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "WAY_OF_GROUPS", function() { return WAY_OF_GROUPS; });
+const AUTHORIZATION = `Basic dXNlckBwYXNzd29yiZAo=weefw50ye54wew`;
+const END_POINT = `https://es8-demo-srv.appspot.com/big-trip/`;
+const ESC_KEY_CODE = 27;
+const ANIMATION_DURATION = 800;
 const TYPE_EVENTS = {
-  'taxi': `🚕`,
-  'bus': `🚌`,
-  'train': `🚂`,
-  'Transport': `🚊`,
-  'Drive': `🚗`,
-  'flight': `✈️`,
-  'sightseeing': `🏛️`,
-  'ship': `🛳️`,
-  'check-in': `🏨`,
-  'Restaurant': `🍴`,
+  'taxi': {icon: `🚕`, add: `to`},
+  'bus': {icon: `🚌`, add: `to`},
+  'train': {icon: `🚂`, add: `to`},
+  'ship': {icon: `🛳️`, add: `to`},
+  'transport': {icon: `🚊`, add: `to`},
+  'drive': {icon: `🚗`, add: `to`},
+  'flight': {icon: `✈️`, add: `to`},
+  'check-in': {icon: `🏨`, add: `in`},
+  'sightseeing': {icon: `🏛️`, add: `in`},
+  'restaurant': {icon: `🍴`, add: `in`},
 };
 
-const STATISTICS = {
-  spentMoney: new Map([
+const WAY_OF_GROUPS = {
+  TRASPORT: [`taxi`, `bus`, `train`, `flight`, `transport`, `drive`, `ship`],
+  PLACES: [`check-in`, `sightseeing`, `restaurant`],
+};
+
+const STATISTIC = {
+  spentMoneyTypes: new Map([
     [`flight`, 0],
     [`check-in`, 0],
-    [`Drive`, 0],
-    [`sight-seeing`, 0],
-    [`Restaurant`, 0],
     [`taxi`, 0],
+    [`sightseeing`, 0],
+    [`restaurant`, 0],
+    [`drive`, 0],
+    [`ship`, 0],
     [`train`, 0],
     [`bus`, 0],
   ]),
-  wasUsed: new Map([
-    [`Drive`, 0],
+  wasUsedTypes: new Map([
+    [`drive`, 0],
     [`taxi`, 0],
     [`flight`, 0],
+    [`ship`, 0],
+    [`train`, 0],
+    [`bus`, 0],
+  ]),
+  spentTimeTypes: new Map([
+    [`flight`, 0],
+    [`check-in`, 0],
+    [`taxi`, 0],
+    [`sightseeing`, 0],
+    [`restaurant`, 0],
+    [`drive`, 0],
+    [`ship`, 0],
     [`train`, 0],
     [`bus`, 0],
   ]),
 };
 
-const filters = [
+const FILTERS = [
   {
-    id: `filter-everything`,
-    name: `Everything`,
     isChecked: true,
     value: `everything`,
   },
   {
-    id: `filter-future`,
-    name: `Future`,
     isChecked: false,
     value: `future`,
   },
   {
-    id: `filter-past`,
-    name: `Past`,
     isChecked: false,
     value: `past`,
+  },
+];
+
+const SORTS = [
+  {
+    value: `event`,
+    isChecked: true,
+  },
+  {
+    value: `time`,
+    isChecked: false,
+  },
+  {
+    value: `price`,
+    isChecked: false,
   },
 ];
 
@@ -38167,54 +38196,147 @@ const filters = [
 
 /***/ }),
 
-/***/ "./src/edit-waypoint.js":
-/*!******************************!*\
-  !*** ./src/edit-waypoint.js ***!
-  \******************************/
+/***/ "./src/data.js":
+/*!*********************!*\
+  !*** ./src/data.js ***!
+  \*********************/
+/*! exports provided: getCitiesOfList, getOffersOfList */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getCitiesOfList", function() { return getCitiesOfList; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getOffersOfList", function() { return getOffersOfList; });
+/* harmony import */ var _api__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./api */ "./src/api.js");
+/* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./constants */ "./src/constants.js");
+
+
+
+const api = new _api__WEBPACK_IMPORTED_MODULE_0__["default"]({endPoint: _constants__WEBPACK_IMPORTED_MODULE_1__["END_POINT"], authorization: _constants__WEBPACK_IMPORTED_MODULE_1__["AUTHORIZATION"]});
+const offers = new Map();
+const citiesList = new Map();
+const destinations = api.getDestination();
+const getOffers = api.getOffers();
+
+const getCitiesOfList = () => {
+  destinations.then((cities) => {
+    cities.forEach((city) => {
+      citiesList.set(city.name, {description: city.description, pictures: [...city.pictures]});
+    });
+  });
+  return citiesList;
+};
+
+const getOffersOfList = () => {
+  getOffers.then((list) => list.forEach((item) => {
+    offers.set(item.type, item.offers);
+  }));
+  return offers;
+};
+
+
+
+
+
+/***/ }),
+
+/***/ "./src/day.js":
+/*!********************!*\
+  !*** ./src/day.js ***!
+  \********************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _data__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./data */ "./src/data.js");
-/* harmony import */ var _component__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./component */ "./src/component.js");
-/* harmony import */ var flatpickr__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! flatpickr */ "./node_modules/flatpickr/dist/flatpickr.js");
-/* harmony import */ var flatpickr__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(flatpickr__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var _component_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./component.js */ "./src/component.js");
+/* harmony import */ var moment__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! moment */ "./node_modules/moment/moment.js");
+/* harmony import */ var moment__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(moment__WEBPACK_IMPORTED_MODULE_1__);
 
 
 
-
-class EditWaypoint extends _component__WEBPACK_IMPORTED_MODULE_1__["default"] {
+class Day extends _component_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
   constructor(data) {
     super();
-    this._id = data.id;
-    this._type = data.type;
-    this._city = data.city;
-    this._timeFrom = data.dateFrom;
-    this._timeTo = data.dateTo;
-    this._price = data.price;
-    this._offers = data.offers;
-    this._photos = data.photos;
-    this._description = data.description;
-    this._isFavorite = data.isFavorite;
-    this._onChangeType = this._onChangeRadioType.bind(this);
-    this._onSearch = this._onFocusInputSearch.bind(this);
-    this._onChangeCity = this._onChangeInputCity.bind(this);
-    this._initDatePickerStartDate = null;
-    this._initDatePickerEndDate = null;
-    this._onSubmit = null;
-    this._onSubmitButtonClick = this._onSubmitButtonClick.bind(this);
-    this._onDelete = this._onDeleteButtonClick.bind(this);
+    this._day = moment__WEBPACK_IMPORTED_MODULE_1___default()(data).date();
+    this._monthAndYear = moment__WEBPACK_IMPORTED_MODULE_1___default()(data).format(`MMM YY`);
   }
 
   get template() {
-    const getOffers = () => {
-      const result = [];
-      this._offers.forEach((item, key) => {
-        result.push(this.offerTemplate(key, item.price, item.isChecked));
-      });
-      return result.join(``);
-    };
+    return `
+    <section class="trip-day">
+      <article class="trip-day__info">
+        <span class="trip-day__caption">Day</span>
+        <p class="trip-day__number">${this._day}</p>
+        <h2 class="trip-day__title">${this._monthAndYear}</h2>
+      </article>
+      <div class="trip-day__items">
+      </div>
+    </section>`.trim();
+  }
+}
+
+/* harmony default export */ __webpack_exports__["default"] = (Day);
+
+
+/***/ }),
+
+/***/ "./src/event-edit.js":
+/*!***************************!*\
+  !*** ./src/event-edit.js ***!
+  \***************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./constants */ "./src/constants.js");
+/* harmony import */ var _component__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./component */ "./src/component.js");
+/* harmony import */ var flatpickr__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! flatpickr */ "./node_modules/flatpickr/dist/flatpickr.js");
+/* harmony import */ var flatpickr__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(flatpickr__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var _util__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./util */ "./src/util.js");
+
+
+
+
+
+class EventEdit extends _component__WEBPACK_IMPORTED_MODULE_1__["default"] {
+  constructor(data) {
+    super();
+    this._id = data.id;
+    this._type = data.type || `taxi`;
+    this._city = data.city || ``;
+    this._timeFrom = data.dateFrom || new Date();
+    this._timeTo = data.dateTo || new Date();
+    this._price = data.price || 0;
+    this._offers = data.offers || new Map();
+    this._photos = data.photos || [];
+    this._description = data.description || ``;
+    this._isFavorite = data.isFavorite || false;
+    this._allOffers = new Map();
+    this._cities = new Map();
+    this._onKeyDown = null;
+    this._initDatePickerStartDate = null;
+    this._initDatePickerEndDate = null;
+    this._onSubmit = null;
+    this._onDelete = null;
+    this._onChangeRadioType = this._onChangeRadioType.bind(this);
+    this._onChangeOffers = this._onChangeOffers.bind(this);
+    this._onFocusInputSearch = this._onFocusInputSearch.bind(this);
+    this._onChangeInputCity = this._onChangeInputCity.bind(this);
+    this._onKeyDownEsc = this._onKeyDownEsc.bind(this);
+    this._onSubmitButtonClick = this._onSubmitButtonClick.bind(this);
+    this._onDeleteButtonClick = this._onDeleteButtonClick.bind(this);
+  }
+
+  get id() {
+    if (this._id === undefined) {
+      throw new Error(`You have to define template.`);
+    }
+    return this._id;
+  }
+
+  get template() {
     return `
       <article class="point animated fast">
         <form action="" method="get">
@@ -38225,39 +38347,21 @@ class EditWaypoint extends _component__WEBPACK_IMPORTED_MODULE_1__["default"] {
             </label>
 
             <div class="travel-way">
-              <label class="travel-way__label" for="travel-way__toggle">${_data__WEBPACK_IMPORTED_MODULE_0__["TYPE_EVENTS"][this._type]}</label>
+              <label class="travel-way__label" for="travel-way__toggle">${_constants__WEBPACK_IMPORTED_MODULE_0__["TYPE_EVENTS"][this._type].icon}</label>
               <input type="checkbox" class="travel-way__toggle visually-hidden" id="travel-way__toggle">
 
               <div class="travel-way__select">
                 <div class="travel-way__select-group">
-                  <input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-taxi" name="travel-way" value="taxi" checked>
-                  <label class="travel-way__select-label" for="travel-way-taxi">🚕 taxi</label>
-
-                  <input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-bus" name="travel-way" value="bus">
-                  <label class="travel-way__select-label" for="travel-way-bus">🚌 bus</label>
-
-                  <input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-train" name="travel-way" value="train">
-                  <label class="travel-way__select-label" for="travel-way-train">🚂 train</label>
-
-                  <input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-flight" name="travel-way" value="flight">
-                  <label class="travel-way__select-label" for="travel-way-flight">✈️ flight</label>
-                  
-                  <input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-ship" name="travel-way" value="ship">
-                  <label class="travel-way__select-label" for="travel-way-ship">🛳️ ship</label>
+                 ${this._getTravelWayTemplate(_constants__WEBPACK_IMPORTED_MODULE_0__["WAY_OF_GROUPS"].TRASPORT)}
                 </div>
-
                 <div class="travel-way__select-group">
-                  <input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-check-in" name="travel-way" value="check-in">
-                  <label class="travel-way__select-label" for="travel-way-check-in">🏨 check-in</label>
-                  
-                  <input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-sightseeing" name="travel-way" value="sightseeing">
-                  <label class="travel-way__select-label" for="travel-way-sightseeing">🏛 sightseeing</label>
+                  ${this._getTravelWayTemplate(_constants__WEBPACK_IMPORTED_MODULE_0__["WAY_OF_GROUPS"].PLACES)}
                 </div>
               </div>
             </div>
 
             <div class="point__destination-wrap">
-              <label class="point__destination-label" for="destination">Flight to</label>
+              <label class="point__destination-label" for="destination">${this._type} ${_constants__WEBPACK_IMPORTED_MODULE_0__["TYPE_EVENTS"][this._type].add}</label>
               <input class="point__destination-input" list="destination-select" id="destination" value="${this._city ? this._city : ``}" name="destination">
               <datalist id="destination-select"></datalist>
             </div>
@@ -38289,14 +38393,14 @@ class EditWaypoint extends _component__WEBPACK_IMPORTED_MODULE_1__["default"] {
             <section class="point__offers">
               <h3 class="point__details-title">offers</h3>
               <div class="point__offers-wrap">
-                ${getOffers()}
+                ${this._getOffersNames()}
               </div>
             </section>
             <section class="point__destination">
               <h3 class="point__details-title">Destination</h3>
               <p class="point__destination-text">${this._description ? this._description : ``}</p>
               <div class="point__destination-images">
-                ${this._photos ? this._photos.map((photo) => `<img src="${photo.src}" alt="${photo.description}" class="point__destination-image">`).join(``).trim() : ``}
+                ${this._getPhotosTemplate()}
               </div>
             </section>
             <input type="hidden" class="point__total-price" name="total-price" value="">
@@ -38305,9 +38409,16 @@ class EditWaypoint extends _component__WEBPACK_IMPORTED_MODULE_1__["default"] {
       </article>`.trim();
   }
 
-  offerTemplate(value, price, isChecked = false) {
-    const id = value.split(` `).join(`-`);
+  _getOffersNames() {
+    const offers = [];
+    this._offers.forEach((item, key) => {
+      offers.push(this._getOfferTemplate(key, item.price, item.isChecked));
+    });
+    return offers.join(``);
+  }
 
+  _getOfferTemplate(value, price, isChecked = false) {
+    const id = value.split(` `).join(`-`);
     return `<div>
               <input class="point__offers-input visually-hidden" type="checkbox" id="${id}" name="offer" value="${value}" ${isChecked ? `checked` : ``}>
               <label for="${id}" class="point__offers-label">
@@ -38316,25 +38427,94 @@ class EditWaypoint extends _component__WEBPACK_IMPORTED_MODULE_1__["default"] {
             </div>`.trim();
   }
 
-  _onChangeRadioType() {
-    if (typeof this._onChangeType !== `function`) {
-      return;
-    }
-    this._onChangeType();
+  _getTravelWayTemplate(ways) {
+    return ways.map((item) => {
+      return `<input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-${item}" name="travel-way" value="${item}" ${this._type === item ? `checked` : ``}>
+          <label class="travel-way__select-label" for="travel-way-${item}">${_constants__WEBPACK_IMPORTED_MODULE_0__["TYPE_EVENTS"][item].icon} ${item}</label>`.trim();
+    }).join(``);
   }
 
-  _onChangeInputCity() {
-    if (typeof this._onChangeCity !== `function`) {
+  _getPhotosTemplate() {
+    return this._photos ? this._photos.map((photo) => `<img src="${photo.src}" alt="${photo.description}" class="point__destination-image">`.trim()).join(``) : ``;
+  }
+
+  _onChangeRadioType(evt) {
+    const offfers = this._element.querySelector(`.point__offers-wrap`);
+    const selectedWay = this._element.querySelector(`.travel-way__label`);
+    const totalPrice = this._element.querySelector(`.point__price input`);
+    const destinationLabel = this._element.querySelector(`.point__destination-label`);
+    const toggleDropdown = this._element.querySelector(`.travel-way__toggle `);
+
+    const hasKey = this._allOffers.has(evt.target.value);
+    selectedWay.textContent = _constants__WEBPACK_IMPORTED_MODULE_0__["TYPE_EVENTS"][evt.target.value].icon;
+    destinationLabel.textContent = `${evt.target.value} ${_constants__WEBPACK_IMPORTED_MODULE_0__["TYPE_EVENTS"][evt.target.value].add}`;
+    toggleDropdown.checked = false;
+    if (!hasKey) {
       return;
     }
-    this._onChangeCity();
+    const targetTypes = this._allOffers.get(evt.target.value);
+    const fragmentForOffers = document.createDocumentFragment();
+
+    totalPrice.value = this._price;
+    this._offers.clear();
+    targetTypes.forEach((offer) => {
+      const offerTemplate = this._getOfferTemplate(offer.name, offer.price);
+      fragmentForOffers.appendChild(Object(_util__WEBPACK_IMPORTED_MODULE_3__["createElement"])(offerTemplate));
+      this._offers.set(offer.name, {price: offer.price, isChecked: false});
+    });
+    offfers.innerHTML = ``;
+    offfers.appendChild(fragmentForOffers);
+  }
+
+  _onChangeOffers(evt) {
+    const totalPrice = this._element.querySelector(`.point__price input`);
+    const isChecked = evt.target.checked;
+    const hasKey = this._offers.has(evt.target.value);
+    const selectedOffer = evt.target.value;
+    const priceOfOffer = this._offers.get(selectedOffer).price;
+    const prevValue = Number(totalPrice.value);
+
+    if (isChecked && hasKey) {
+      totalPrice.value = prevValue + priceOfOffer;
+    } else {
+      totalPrice.value = prevValue - priceOfOffer;
+    }
+  }
+
+  _onChangeInputCity(evt) {
+    const pictures = this._element.querySelector(`.point__destination-images`);
+    const description = this._element.querySelector(`.point__destination-text`);
+
+    if (!this._cities.has(evt.target.value)) {
+      return;
+    }
+    const targetCity = this._cities.get(evt.target.value);
+    const fragment = document.createDocumentFragment();
+
+    description.textContent = targetCity.description;
+    this._description = targetCity.description;
+    this._photos = targetCity.pictures;
+    targetCity.pictures.forEach((picture) => {
+      fragment.appendChild(Object(_util__WEBPACK_IMPORTED_MODULE_3__["makeImage"])(picture.src, picture.alt, `point__destination-image`));
+    });
+    pictures.innerHTML = ``;
+    pictures.appendChild(fragment);
   }
 
   _onFocusInputSearch() {
-    if (typeof this._onSearch !== `function`) {
+    const datalist = this._element.querySelector(`datalist`);
+    const citiesFragment = document.createDocumentFragment();
+    for (let [key] of this._cities) {
+      citiesFragment.appendChild(Object(_util__WEBPACK_IMPORTED_MODULE_3__["createElement"])(`<option value="${key}">`));
+    }
+    datalist.appendChild(citiesFragment);
+  }
+
+  _onKeyDownEsc(evt) {
+    if (typeof this._onKeyDown !== `function`) {
       return;
     }
-    this._onSearch();
+    this._onKeyDown(this, evt);
   }
 
   _initDatePickers() {
@@ -38347,7 +38527,6 @@ class EditWaypoint extends _component__WEBPACK_IMPORTED_MODULE_1__["default"] {
       'dateFormat': `H:i`,
       'defaultDate': this._timeFrom,
       'time_24hr': true,
-      'noCalendar': true,
       onClose(selectedDates) {
         self._timeFrom = selectedDates[0];
       },
@@ -38357,7 +38536,6 @@ class EditWaypoint extends _component__WEBPACK_IMPORTED_MODULE_1__["default"] {
       'dateFormat': `H:i`,
       'defaultDate': this._timeTo,
       'time_24hr': true,
-      'noCalendar': true,
       onClose(selectedDates) {
         self._timeTo = selectedDates[0];
       },
@@ -38374,7 +38552,7 @@ class EditWaypoint extends _component__WEBPACK_IMPORTED_MODULE_1__["default"] {
       return;
     }
     evt.preventDefault();
-    const formData = new FormData(this._element.querySelector(`form`));
+    const formData = new FormData(evt.target);
     const updatedEvent = this._processForm(formData);
     updatedEvent.id = this._id;
     this._onSubmit(updatedEvent, this);
@@ -38385,7 +38563,8 @@ class EditWaypoint extends _component__WEBPACK_IMPORTED_MODULE_1__["default"] {
       return;
     }
     evt.preventDefault();
-    this._onDelete();
+    this._deletingData();
+    this._onDelete(this);
   }
 
   _processForm(formData) {
@@ -38403,7 +38582,7 @@ class EditWaypoint extends _component__WEBPACK_IMPORTED_MODULE_1__["default"] {
       photos: this._photos,
       isFavorite: false,
     };
-    const editMapper = EditWaypoint.createMapper(entry);
+    const editMapper = EventEdit.createMapper(entry);
     for (let [property, value] of formData.entries()) {
       if (editMapper[property]) {
         editMapper[property](value);
@@ -38412,34 +38591,60 @@ class EditWaypoint extends _component__WEBPACK_IMPORTED_MODULE_1__["default"] {
     return entry;
   }
 
+  _deletingData() {
+    const submitBtn = this._element.querySelector(`.point__button--save`);
+    const deleteBtn = this._element.querySelector(`.point__button--delete`);
+    submitBtn.disabled = true;
+    deleteBtn.disabled = true;
+    deleteBtn.textContent = `Deleting...`;
+  }
+
   bind() {
-    this._element.querySelector(`.travel-way__select`).addEventListener(`change`, this._onChangeType);
-    this._element.querySelector(`.point__destination-input`).addEventListener(`focus`, this._onSearch);
-    this._element.querySelector(`.point__destination-input`).addEventListener(`change`, this._onChangeCity);
+    this._element.querySelector(`.travel-way__select`).addEventListener(`change`, this._onChangeRadioType);
+    this._element.querySelector(`.point__destination-input`).addEventListener(`focus`, this._onFocusInputSearch);
+    this._element.querySelector(`.point__destination-input`).addEventListener(`change`, this._onChangeInputCity);
+    this._element.querySelector(`.point__offers-wrap`).addEventListener(`change`, this._onChangeOffers);
     this._element.addEventListener(`submit`, this._onSubmitButtonClick);
-    this._element.addEventListener(`reset`, this._onDelete);
+    this._element.addEventListener(`reset`, this._onDeleteButtonClick);
+    document.addEventListener(`keydown`, this._onKeyDownEsc);
     this._initDatePickers();
   }
 
   unbind() {
+    this._element.querySelector(`.travel-way__select`).removeEventListener(`change`, this._onChangeRadioType);
+    this._element.querySelector(`.point__destination-input`).removeEventListener(`focus`, this._onFocusInputSearch);
+    this._element.querySelector(`.point__destination-input`).removeEventListener(`change`, this._onChangeInputCity);
+    this._element.querySelector(`.point__offers-wrap`).removeEventListener(`change`, this._onChangeOffers);
     this._element.removeEventListener(`submit`, this._onSubmitButtonClick);
-    this._element.removeEventListener(`reset`, this._onDelete);
-    this._element.querySelector(`.travel-way__select`).removeEventListener(`change`, this._onChangeType);
-    this._element.querySelector(`.point__destination-input`).removeEventListener(`focus`, this._onSearch);
-    this._element.querySelector(`.point__destination-input`).removeEventListener(`change`, this._onChangeCity);
+    this._element.removeEventListener(`reset`, this._onDeleteButtonClick);
+    document.removeEventListener(`keydown`, this._onKeyDownEsc);
     this._destroyDatePickers();
   }
 
-  set onChangeType(fn) {
-    this._onChangeType = fn;
+  lockForm() {
+    const submitBtn = this._element.querySelector(`.point__button--save`);
+    const deleteBtn = this._element.querySelector(`.point__button--delete`);
+    submitBtn.disabled = true;
+    deleteBtn.disabled = true;
+    submitBtn.textContent = `Saving...`;
   }
 
-  set onSearch(fn) {
-    this._onSearch = fn;
+  unlockForm() {
+    const submitBtn = this._element.querySelector(`.point__button--save`);
+    const deleteBtn = this._element.querySelector(`.point__button--delete`);
+    submitBtn.textContent = `Save`;
+    deleteBtn.textContent = `Delete`;
+    submitBtn.disabled = false;
+    deleteBtn.disabled = false;
   }
 
-  set onChangeCity(fn) {
-    this._onChangeCity = fn;
+  initErrorForm() {
+    this._element.classList.add(`jello`);
+    this._element.classList.add(`error`);
+    setTimeout(() => {
+      this._element.classList.remove(`jello`);
+      this._element.classList.remove(`error`);
+    }, _constants__WEBPACK_IMPORTED_MODULE_0__["ANIMATION_DURATION"]);
   }
 
   set onSubmit(fn) {
@@ -38448,6 +38653,18 @@ class EditWaypoint extends _component__WEBPACK_IMPORTED_MODULE_1__["default"] {
 
   set onDelete(fn) {
     this._onDelete = fn;
+  }
+
+  set onKeyDownEscExit(fn) {
+    this._onKeyDown = fn;
+  }
+
+  set offers(offers) {
+    this._allOffers = offers;
+  }
+
+  set cities(cities) {
+    this._cities = cities;
   }
 
   static createMapper(target) {
@@ -38471,7 +38688,149 @@ class EditWaypoint extends _component__WEBPACK_IMPORTED_MODULE_1__["default"] {
   }
 }
 
-/* harmony default export */ __webpack_exports__["default"] = (EditWaypoint);
+/* harmony default export */ __webpack_exports__["default"] = (EventEdit);
+
+
+/***/ }),
+
+/***/ "./src/event.js":
+/*!**********************!*\
+  !*** ./src/event.js ***!
+  \**********************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./constants */ "./src/constants.js");
+/* harmony import */ var _component__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./component */ "./src/component.js");
+/* harmony import */ var moment__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! moment */ "./node_modules/moment/moment.js");
+/* harmony import */ var moment__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(moment__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var moment_duration_format__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! moment-duration-format */ "./node_modules/moment-duration-format/lib/moment-duration-format.js");
+/* harmony import */ var moment_duration_format__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(moment_duration_format__WEBPACK_IMPORTED_MODULE_3__);
+
+
+
+
+
+moment_duration_format__WEBPACK_IMPORTED_MODULE_3___default()(moment__WEBPACK_IMPORTED_MODULE_2___default.a);
+
+class Event extends _component__WEBPACK_IMPORTED_MODULE_1__["default"] {
+  constructor(data) {
+    super();
+    this._type = data.type;
+    this._dateFrom = data.dateFrom;
+    this._dateTo = data.dateTo;
+    this._duration = null;
+    this._price = data.price;
+    this._offers = data.offers;
+    this._city = data.city;
+    this._onClick = null;
+  }
+
+  get template() {
+    const startDate = moment__WEBPACK_IMPORTED_MODULE_2___default()(this._dateFrom);
+    const endDate = moment__WEBPACK_IMPORTED_MODULE_2___default()(this._dateTo);
+    this._duration = moment__WEBPACK_IMPORTED_MODULE_2___default.a.duration(endDate.diff(startDate)).format(`DD[D] h[H] m[M]`);
+
+    return `<article class="trip-point" tabindex="0">
+          <i class="trip-icon">${_constants__WEBPACK_IMPORTED_MODULE_0__["TYPE_EVENTS"][this._type].icon}</i>
+          <h3 class="trip-point__title">${this._type} ${_constants__WEBPACK_IMPORTED_MODULE_0__["TYPE_EVENTS"][this._type].add} ${this._city}</h3>
+          <p class="trip-point__schedule">
+            <span class="trip-point__timetable">${startDate.format(`H:mm`)} — ${endDate.format(`H:mm`)}</span>
+            <span class="trip-point__duration">${this._duration}</span>
+          </p>
+          <p class="trip-point__price">&euro;&nbsp;${this._price ? this._price : 0}</p>
+          <ul class="trip-point__offers">
+          ${this._getOffersTemplate()}
+          </ul>
+        </article>`.trim();
+  }
+
+  _getOffersNames() {
+    const filteredOffers = [];
+    this._offers.forEach((item, key) => {
+      if (item.isChecked) {
+        filteredOffers.push(key);
+      }
+    });
+    return filteredOffers.reverse().splice(-2).reverse();
+  }
+
+  _getOffersTemplate() {
+    return this._getOffersNames().map((offer) => `<li><button class="trip-point__offer">${offer}</button></li>`).join(``);
+  }
+
+  bind() {
+    this._element.addEventListener(`click`, this._onClick);
+  }
+
+  unbind() {
+    this._element.removeEventListener(`click`, this._onClick);
+  }
+
+  set onClick(func) {
+    this._onClick = func;
+  }
+}
+
+/* harmony default export */ __webpack_exports__["default"] = (Event);
+
+
+/***/ }),
+
+/***/ "./src/filter-events.js":
+/*!******************************!*\
+  !*** ./src/filter-events.js ***!
+  \******************************/
+/*! exports provided: filterEvents, renderFilters */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "filterEvents", function() { return filterEvents; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "renderFilters", function() { return renderFilters; });
+/* harmony import */ var _filter__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./filter */ "./src/filter.js");
+/* harmony import */ var _state__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./state */ "./src/state.js");
+
+
+
+const listOfFilter = document.querySelector(`.trip-filter`);
+
+const filterEvents = (events, filterType) => {
+  if (!events) {
+    return false;
+  }
+  const currentDate = new Date();
+  switch (filterType) {
+    case `future`:
+      return events.filter((it) => {
+        return it.dateFrom > currentDate;
+      });
+    case `past`:
+      return events.filter((it) => {
+        return it.dateFrom < currentDate;
+      });
+    default:
+      return [...events];
+  }
+};
+
+const renderFilters = (filtersOptions, cb) => {
+  const fragment = document.createDocumentFragment();
+  for (let item of filtersOptions) {
+    const filter = new _filter__WEBPACK_IMPORTED_MODULE_0__["default"](item);
+    filter.render();
+    filter.onFilter = (evt) => {
+      _state__WEBPACK_IMPORTED_MODULE_1__["state"].filter = evt.target.value;
+      cb(Object(_state__WEBPACK_IMPORTED_MODULE_1__["getStateEvents"])());
+    };
+    fragment.appendChild(filter.element);
+  }
+  listOfFilter.appendChild(fragment);
+};
+
+
 
 
 /***/ }),
@@ -38489,15 +38848,16 @@ __webpack_require__.r(__webpack_exports__);
 
 
 class Filter extends _component__WEBPACK_IMPORTED_MODULE_0__["default"] {
-  constructor(filter) {
+  constructor(filters) {
     super();
-    this._filter = filter;
+    this._value = filters.value;
+    this._isChecked = filters.checked;
     this._onFilter = this._onChangeFilter.bind(this);
   }
 
   _onChangeFilter(evt) {
-    evt.preventDefault();
     if (typeof this._onFilter === `function`) {
+      window.scrollTo(0, 0);
       this._onFilter(evt);
     }
   }
@@ -38508,8 +38868,8 @@ class Filter extends _component__WEBPACK_IMPORTED_MODULE_0__["default"] {
 
   get template() {
     return `<div>
-      <input type="radio" id="${this._filter.id}" name="filter" value="${this._filter.value}" ${this._filter.isChecked ? `checked` : ``}>
-      <label class="trip-filter__item" for="${this._filter.id}">${this._filter.name}</label></div>`.trim();
+      <input type="radio" id="filter-${this._value}" name="filter" value="${this._value}" ${this._isChecked ? `checked` : ``}>
+      <label class="trip-filter__item" for="filter-${this._value}">${this._value.toUpperCase()}</label></div>`.trim();
   }
 
   bind() {
@@ -38535,14 +38895,21 @@ class Filter extends _component__WEBPACK_IMPORTED_MODULE_0__["default"] {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _filter__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./filter */ "./src/filter.js");
-/* harmony import */ var _waypoint__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./waypoint */ "./src/waypoint.js");
-/* harmony import */ var _edit_waypoint__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./edit-waypoint */ "./src/edit-waypoint.js");
-/* harmony import */ var _statistics__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./statistics */ "./src/statistics.js");
-/* harmony import */ var _data__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./data */ "./src/data.js");
-/* harmony import */ var _view_mode__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./view-mode */ "./src/view-mode.js");
-/* harmony import */ var _api__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./api */ "./src/api.js");
-/* harmony import */ var _util__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./util */ "./src/util.js");
+/* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./constants */ "./src/constants.js");
+/* harmony import */ var _event__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./event */ "./src/event.js");
+/* harmony import */ var _event_edit__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./event-edit */ "./src/event-edit.js");
+/* harmony import */ var _api__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./api */ "./src/api.js");
+/* harmony import */ var _total_cost__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./total-cost */ "./src/total-cost.js");
+/* harmony import */ var _day__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./day */ "./src/day.js");
+/* harmony import */ var _data__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./data */ "./src/data.js");
+/* harmony import */ var _statistics__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./statistics */ "./src/statistics.js");
+/* harmony import */ var _view_mode__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./view-mode */ "./src/view-mode.js");
+/* harmony import */ var _model_event__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./model-event */ "./src/model-event.js");
+/* harmony import */ var moment__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! moment */ "./node_modules/moment/moment.js");
+/* harmony import */ var moment__WEBPACK_IMPORTED_MODULE_10___default = /*#__PURE__*/__webpack_require__.n(moment__WEBPACK_IMPORTED_MODULE_10__);
+/* harmony import */ var _state__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./state */ "./src/state.js");
+/* harmony import */ var _sort_events__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./sort-events */ "./src/sort-events.js");
+/* harmony import */ var _filter_events__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ./filter-events */ "./src/filter-events.js");
 
 
 
@@ -38552,61 +38919,216 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-const AUTHORIZATION = `Basic dXNlckBwYXNzd29yZAo=14`;
-const END_POINT = `https://es8-demo-srv.appspot.com/big-trip/`;
 
-const api = new _api__WEBPACK_IMPORTED_MODULE_6__["default"]({endPoint: END_POINT, authorization: AUTHORIZATION});
-const destinations = api.getDestination();
-const getOffers = api.getOffers();
-const offers = new Map();
-const citiesList = new Map();
-const eventContaiter = document.querySelector(`.trip-day__items`);
-const listOfFilter = document.querySelector(`.trip-filter`);
-const animationDurationMC = 800;
-const state = {
-  events: null,
-  filter: `everything`,
+
+
+
+
+
+const api = new _api__WEBPACK_IMPORTED_MODULE_3__["default"]({endPoint: _constants__WEBPACK_IMPORTED_MODULE_0__["END_POINT"], authorization: _constants__WEBPACK_IMPORTED_MODULE_0__["AUTHORIZATION"]});
+const cities = Object(_data__WEBPACK_IMPORTED_MODULE_6__["getCitiesOfList"])();
+const offers = Object(_data__WEBPACK_IMPORTED_MODULE_6__["getOffersOfList"])();
+const newEventBtn = document.querySelector(`.new-event`);
+const header = document.querySelector(`.trip`);
+const points = document.querySelector(`.trip-points`);
+
+const renderEvents = (events) => {
+  if (events.length === 0) {
+    return;
+  }
+  const totalCost = new _total_cost__WEBPACK_IMPORTED_MODULE_4__["default"](events);
+  const daysOfEvents = events.map((it) => moment__WEBPACK_IMPORTED_MODULE_10___default()(it.dateFrom).format(`DD-MMM-YY`));
+  const listOfDays = [...new Set(daysOfEvents)];
+  points.innerHTML = ``;
+  for (let date of listOfDays) {
+    const groupsOfDays = events.filter((it) => moment__WEBPACK_IMPORTED_MODULE_10___default()(it.dateFrom).format(`DD-MMM-YY`) === date);
+    const day = new _day__WEBPACK_IMPORTED_MODULE_5__["default"](date).render();
+    const days = day.querySelector(`.trip-day__items`);
+    groupsOfDays.forEach((item) => {
+      const event = new _event__WEBPACK_IMPORTED_MODULE_1__["default"](item);
+      const eventEdit = new _event_edit__WEBPACK_IMPORTED_MODULE_2__["default"](item);
+      event.onClick = () => {
+        eventEdit.onSubmit = onSubmit;
+        eventEdit.onKeyDownEscExit = onKeyDownEscExit;
+        eventEdit.onDelete = onDelete;
+        eventEdit.cities = cities;
+        eventEdit.offers = offers;
+        eventEdit.render();
+        days.replaceChild(eventEdit.element, event.element);
+      };
+      event.render();
+      days.appendChild(event.element);
+    });
+    points.appendChild(day);
+  }
+
+  header.lastElementChild.remove();
+  header.appendChild(totalCost.render());
 };
-destinations.then((cities) => {
-  cities.forEach((city) => {
-    citiesList.set(city.name, {description: city.description, pictures: [...city.pictures]});
-  });
-});
 
-getOffers.then((list) => list.forEach((item) => {
-  offers.set(item.type, item.offers);
-}));
-const getStatistics = (events) => {
-  _data__WEBPACK_IMPORTED_MODULE_4__["STATISTICS"].spentMoney.forEach((item, key) => _data__WEBPACK_IMPORTED_MODULE_4__["STATISTICS"].spentMoney.set(key, 0));
-  _data__WEBPACK_IMPORTED_MODULE_4__["STATISTICS"].wasUsed.forEach((item, key) => _data__WEBPACK_IMPORTED_MODULE_4__["STATISTICS"].wasUsed.set(key, 0));
-  events.forEach((item) => {
-    if (_data__WEBPACK_IMPORTED_MODULE_4__["STATISTICS"].spentMoney.has(item.type)) {
-      _data__WEBPACK_IMPORTED_MODULE_4__["STATISTICS"].spentMoney.set(item.type, _data__WEBPACK_IMPORTED_MODULE_4__["STATISTICS"].spentMoney.get(item.type) + item.price);
+const onSubmit = (newObject, component) => {
+  component.lockForm();
+  api.updateEvent({id: component.id, data: Object(_model_event__WEBPACK_IMPORTED_MODULE_9__["toRAW"])(newObject)}).then((newEvent) => {
+    updateDataEvent(newEvent);
+    renderEvents(Object(_state__WEBPACK_IMPORTED_MODULE_11__["getStateEvents"])());
+    component.destroy();
+    if (_state__WEBPACK_IMPORTED_MODULE_11__["state"].mode === `creating`) {
+      newEventBtn.disabled = !newEventBtn.disabled;
+      _state__WEBPACK_IMPORTED_MODULE_11__["state"].mode = `default`;
     }
-    if (_data__WEBPACK_IMPORTED_MODULE_4__["STATISTICS"].wasUsed.has(item.type)) {
-      _data__WEBPACK_IMPORTED_MODULE_4__["STATISTICS"].wasUsed.set(item.type, _data__WEBPACK_IMPORTED_MODULE_4__["STATISTICS"].wasUsed.get(item.type) + 1);
-    }
-  });
-  return _data__WEBPACK_IMPORTED_MODULE_4__["STATISTICS"];
+  })
+    .catch(() => {
+      component.unlockForm();
+      component.initErrorForm();
+    });
 };
 
-const updateEvent = (newEvent) => {
-  const updatedItemIndex = state.events.findIndex((item) => item.id === newEvent.id);
-  return Object.assign(state.events[updatedItemIndex], newEvent);
+const onDelete = (component) => {
+  api.deleteEvent({id: component.id})
+    .then(() => api.getOffers())
+    .then(() => {
+      deleteEvent(component.id);
+      component.destroy();
+      if (_state__WEBPACK_IMPORTED_MODULE_11__["state"].events === null) {
+        _state__WEBPACK_IMPORTED_MODULE_11__["state"].events = [];
+      }
+      renderEvents(Object(_state__WEBPACK_IMPORTED_MODULE_11__["getStateEvents"])());
+    })
+    .catch(() => {
+      component.unlockForm();
+      component.initErrorForm();
+    });
+  newEventBtn.disabled = false;
+};
+
+const onKeyDownEscExit = (component, evt) => {
+  if (evt.keyCode === _constants__WEBPACK_IMPORTED_MODULE_0__["ESC_KEY_CODE"]) {
+    component.destroy();
+    renderEvents(Object(_state__WEBPACK_IMPORTED_MODULE_11__["getStateEvents"])());
+    if (_state__WEBPACK_IMPORTED_MODULE_11__["state"].mode === `creating`) {
+      newEventBtn.disabled = !newEventBtn.disabled;
+      _state__WEBPACK_IMPORTED_MODULE_11__["state"].mode = `default`;
+    }
+  }
+};
+
+const updateDataEvent = (newEvent) => {
+  const updatedItemIndex = _state__WEBPACK_IMPORTED_MODULE_11__["state"].events.findIndex((item) => item.id === newEvent.id);
+  return Object.assign(_state__WEBPACK_IMPORTED_MODULE_11__["state"].events[updatedItemIndex], newEvent);
 };
 
 const deleteEvent = (id) => {
-  const removedItemIndex = state.events.findIndex((item) => item.id === id);
-  const filtered = filterEvents(state.events, state.filter);
-  state.events.splice(removedItemIndex, 1);
-  renderEvents(filtered);
-  Object(_statistics__WEBPACK_IMPORTED_MODULE_3__["default"])(getStatistics(filtered));
+  const removedItemIndex = _state__WEBPACK_IMPORTED_MODULE_11__["state"].events.findIndex((item) => item.id === id);
+  _state__WEBPACK_IMPORTED_MODULE_11__["state"].events.splice(removedItemIndex, 1);
+  if (_state__WEBPACK_IMPORTED_MODULE_11__["state"].events.length !== 0) {
+    renderEvents(Object(_state__WEBPACK_IMPORTED_MODULE_11__["getStateEvents"])());
+  }
 };
 
-// Хотел изначально добавить это в виде метода для класса ModelEvent
-// но появляется ошибка которую я не могу исправить
+const createEvent = (newObject, component) => {
+  component.lockForm();
+  api.createEvent(Object(_model_event__WEBPACK_IMPORTED_MODULE_9__["toRAW"])(newObject)).then((newMadeEvent) => {
+    _state__WEBPACK_IMPORTED_MODULE_11__["state"].events.push(newMadeEvent);
+    renderEvents(Object(_state__WEBPACK_IMPORTED_MODULE_11__["getStateEvents"])());
+    component.destroy();
+    newEventBtn.disabled = !newEventBtn.disabled;
+    _state__WEBPACK_IMPORTED_MODULE_11__["state"].mode = `default`;
+  })
+    .catch(() => {
+      component.unlockForm();
+      component.initErrorForm();
+    });
+};
+
+const newEventClickHandler = (evt) => {
+  let idEvent;
+  if (_state__WEBPACK_IMPORTED_MODULE_11__["state"].events === null) {
+    idEvent = 0;
+  } else {
+    idEvent = _state__WEBPACK_IMPORTED_MODULE_11__["state"].events.length;
+  }
+  const newEvent = new _event_edit__WEBPACK_IMPORTED_MODULE_2__["default"]({id: idEvent});
+  _state__WEBPACK_IMPORTED_MODULE_11__["state"].mode = `creating`;
+  evt.target.disabled = !evt.target.disabled;
+  newEvent.offers = offers;
+  newEvent.cities = cities;
+  newEvent.onSubmit = createEvent;
+  newEvent.onKeyDownEscExit = onKeyDownEscExit;
+  points.prepend(newEvent.render());
+  newEvent.element.classList.add(`editing`);
+  window.scrollTo(0, 0);
+};
+
+const getPoints = () => {
+  points.innerHTML = `Loading route...`;
+  api.getPoints()
+    .then((events) => {
+      if (events.length === 0) {
+        points.innerHTML = ``;
+      } else {
+        renderEvents(events);
+        _state__WEBPACK_IMPORTED_MODULE_11__["state"].events = events;
+        Object(_statistics__WEBPACK_IMPORTED_MODULE_7__["getStatistics"])(events, _statistics__WEBPACK_IMPORTED_MODULE_7__["updateData"]);
+      }
+    })
+    .catch(() => {
+      points.innerHTML = `Something went wrong while loading your route info. Check your connection or try again later`;
+    });
+};
+
+newEventBtn.addEventListener(`click`, newEventClickHandler);
+Object(_view_mode__WEBPACK_IMPORTED_MODULE_8__["default"])();
+Object(_filter_events__WEBPACK_IMPORTED_MODULE_13__["renderFilters"])(_constants__WEBPACK_IMPORTED_MODULE_0__["FILTERS"], renderEvents);
+Object(_sort_events__WEBPACK_IMPORTED_MODULE_12__["renderSorts"])(_constants__WEBPACK_IMPORTED_MODULE_0__["SORTS"], renderEvents);
+getPoints();
+
+
+
+/***/ }),
+
+/***/ "./src/model-event.js":
+/*!****************************!*\
+  !*** ./src/model-event.js ***!
+  \****************************/
+/*! exports provided: ModelEvent, toRAW */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ModelEvent", function() { return ModelEvent; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "toRAW", function() { return toRAW; });
+class ModelEvent {
+  constructor(data) {
+    this.id = data.id;
+    this.type = data.type;
+    this.dateFrom = new Date(data[`date_from`]);
+    this.dateTo = new Date(data[`date_to`]);
+    this.price = data[`base_price`];
+    this.offers = new Map();
+    this.city = data.destination.name;
+    this.photos = data.destination.pictures;
+    this.description = data.destination.description;
+    this.isFavorite = !!data[`is_favorite`];
+
+    data[`offers`].forEach((item) => {
+      this.offers.set(item[`title`], {
+        price: item[`price`],
+        isChecked: item[`accepted`],
+      });
+    });
+  }
+  static parseEvent(data) {
+    return new ModelEvent(data);
+  }
+
+  static parseEvents(data) {
+    return data.map(ModelEvent.parseEvent);
+  }
+}
+
 const toRAW = (data) => {
   const listOfOffers = [];
+
   data.offers.forEach((item, key) => {
     listOfOffers.push({
       title: key,
@@ -38623,240 +39145,156 @@ const toRAW = (data) => {
     'offers': listOfOffers,
     'destination': {
       'name': data.city,
-      'pictures': data.photos,
+      'pictures': data.photos || [],
       'description': data.description,
     },
-    'is_favorite': data.isFavorite ? `true` : `false`,
+    'is_favorite': data.isFavorite,
   };
 };
 
-const onSubmit = (newObject, event) => {
-  // Тут и в сеттере onDelete есть одинаковый код который нужно было бы куда-то
-  // отдельно вынести поидее
-  const submitBtn = event.element.querySelector(`.point__button--save`);
-  const deleteBtn = event.element.querySelector(`.point__button--delete`);
-  submitBtn.disabled = true;
-  deleteBtn.disabled = true;
-  submitBtn.textContent = `Saving...`;
-  api.updateEvent({id: event.id, data: toRAW(newObject)}).then((newEvent) => {
-    const filtered = filterEvents(state.events, state.filter);
-    updateEvent(newEvent);
-    renderEvents(filtered);
-    Object(_statistics__WEBPACK_IMPORTED_MODULE_3__["default"])(getStatistics(filtered));
-    event.destroy();
-  })
-    .catch(() => {
-      event.element.classList.add(`jello`);
-      event.element.classList.add(`error`);
-      submitBtn.textContent = `Save`;
-      submitBtn.disabled = false;
-      deleteBtn.disabled = false;
-      setTimeout(() => {
-        event.element.classList.remove(`jello`);
-        event.element.classList.remove(`error`);
-      }, animationDurationMC);
-    });
+
+
+
+/***/ }),
+
+/***/ "./src/sort-events.js":
+/*!****************************!*\
+  !*** ./src/sort-events.js ***!
+  \****************************/
+/*! exports provided: sortEvents, renderSorts */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "sortEvents", function() { return sortEvents; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "renderSorts", function() { return renderSorts; });
+/* harmony import */ var _sorter__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./sorter */ "./src/sorter.js");
+/* harmony import */ var _state__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./state */ "./src/state.js");
+
+
+
+const tripSorting = document.querySelector(`.trip-sorting`);
+const sortToTime = (events) => {
+  return events.sort((current, next) => {
+    const durationCurrent = current.dateTo - current.dateFrom;
+    const durationNext = next.dateTo - next.dateFrom;
+    return durationCurrent - durationNext;
+  });
 };
 
-const createImage = (src, alt, className) => {
-  const img = new Image();
-  img.src = src;
-  img.alt = alt;
-  img.classList.add(className);
-  return img;
+const sortToSpentMoney = (events) => {
+  return events.sort((current, next) => current.price - next.price);
 };
 
-const renderEvents = (events) => {
+const renderSorts = (sortstData, cb) => {
   const fragment = document.createDocumentFragment();
 
-  events.forEach((item) => {
-    const waypointComponent = new _waypoint__WEBPACK_IMPORTED_MODULE_1__["default"](item);
-    const openedWaypoint = new _edit_waypoint__WEBPACK_IMPORTED_MODULE_2__["default"](item);
-
-    waypointComponent.onClick = () => {
-      openedWaypoint.render();
-      eventContaiter.replaceChild(openedWaypoint.element, waypointComponent._element);
+  for (let item of sortstData) {
+    const sortItem = new _sorter__WEBPACK_IMPORTED_MODULE_0__["default"](item);
+    sortItem.render();
+    sortItem.onChange = (evt) => {
+      _state__WEBPACK_IMPORTED_MODULE_1__["state"].sort = evt.target.value;
+      cb(Object(_state__WEBPACK_IMPORTED_MODULE_1__["getStateEvents"])());
     };
-
-    openedWaypoint.onChangeType = (evt) => {
-      const offfers = openedWaypoint.element.querySelector(`.point__offers-wrap`);
-      if (!offers.has(evt.target.value)) {
-        offfers.innerHTML = ``;
-        openedWaypoint._offers = new Map();
-        return;
-      }
-      const selectedWay = openedWaypoint.element.querySelector(`.travel-way__label`);
-      const targetType = offers.get(evt.target.value);
-      const fragmentForOffers = document.createDocumentFragment();
-      selectedWay.textContent = _data__WEBPACK_IMPORTED_MODULE_4__["TYPE_EVENTS"][evt.target.value];
-      targetType.forEach((offer) => {
-        const offerTemplate = openedWaypoint.offerTemplate(offer.name, offer.price);
-        fragmentForOffers.appendChild(Object(_util__WEBPACK_IMPORTED_MODULE_7__["createElement"])(offerTemplate));
-      });
-      openedWaypoint._offers.clear();
-      targetType.forEach((offer) => {
-        openedWaypoint._offers.set(offer.name, {price: offer.price, isChecked: false});
-      });
-      offfers.innerHTML = ``;
-      offfers.appendChild(fragmentForOffers);
-    };
-
-    openedWaypoint.onSearch = () => {
-      const datalist = openedWaypoint.element.querySelector(`datalist`);
-      const citiesFragment = document.createDocumentFragment();
-      for (let [key] of citiesList) {
-        citiesFragment.appendChild(Object(_util__WEBPACK_IMPORTED_MODULE_7__["createElement"])(`<option value="${key}">`));
-      }
-      datalist.appendChild(citiesFragment);
-    };
-
-    openedWaypoint.onChangeCity = (evt) => {
-      const pictures = openedWaypoint.element.querySelector(`.point__destination-images`);
-      const description = openedWaypoint.element.querySelector(`.point__destination-text`);
-      if (!citiesList.has(evt.target.value)) {
-        pictures.innerHTML = ``;
-        pictures.textContent = `no photos`;
-        description.textContent = `no description`;
-        openedWaypoint._description = ``;
-        openedWaypoint._photos = [];
-        return;
-      }
-      const targetCity = citiesList.get(evt.target.value);
-      const fragmentForPhotos = document.createDocumentFragment();
-      description.textContent = targetCity.description;
-      openedWaypoint._description = targetCity.description;
-      openedWaypoint._photos = targetCity.pictures;
-      targetCity.pictures.forEach((picture) => {
-        fragmentForPhotos.appendChild(createImage(picture.src, picture.alt, `point__destination-image`));
-      });
-      pictures.innerHTML = ``;
-      pictures.appendChild(fragmentForPhotos);
-    };
-
-    openedWaypoint.onSubmit = onSubmit;
-
-    openedWaypoint.onDelete = () => {
-      const submitBtn = openedWaypoint.element.querySelector(`.point__button--save`);
-      const deleteBtn = openedWaypoint.element.querySelector(`.point__button--delete`);
-      submitBtn.disabled = true;
-      deleteBtn.disabled = true;
-      deleteBtn.textContent = `Deleting...`;
-      api.deleteEvent({id: item.id})
-        .then(() => api.getOffers())
-        .then(() => {
-          deleteEvent(item.id);
-          openedWaypoint.destroy();
-          Object(_statistics__WEBPACK_IMPORTED_MODULE_3__["default"])(getStatistics(state.events));
-        })
-        .catch(() => {
-          openedWaypoint.element.classList.add(`jello`);
-          openedWaypoint.element.classList.add(`error`);
-          deleteBtn.textContent = `Delete`;
-          submitBtn.disabled = false;
-          deleteBtn.disabled = false;
-          setTimeout(() => {
-            openedWaypoint.element.classList.remove(`jello`);
-            openedWaypoint.element.classList.remove(`error`);
-          }, animationDurationMC);
-        });
-    };
-
-    waypointComponent.render();
-    fragment.appendChild(waypointComponent.element);
-  });
-
-  eventContaiter.innerHTML = ``;
-  eventContaiter.appendChild(fragment);
+    fragment.appendChild(sortItem.element);
+  }
+  tripSorting.prepend(fragment);
 };
-
-const filterEvents = (events, filterType) => {
-  const currentDate = new Date();
-  switch (filterType) {
-    case `future`:
-      return events.filter((it) => it.dateFrom.getTime() > currentDate.getTime());
-    case `past`:
-      return events.filter((it) => it.dateFrom.getTime() < currentDate.getTime());
+const sortEvents = (events, sortType) => {
+  if (!events) {
+    return false;
+  }
+  switch (sortType) {
+    case `time`:
+      return sortToTime(events);
+    case `price`:
+      return sortToSpentMoney(events);
     default:
       return events;
   }
 };
 
-const renderFilters = (filtersData) => {
-  const fragment = document.createDocumentFragment();
-
-  for (let item of filtersData) {
-    const filter = new _filter__WEBPACK_IMPORTED_MODULE_0__["default"](item);
-    filter.render();
-    filter.onFilter = (evt) => {
-      eventContaiter.innerHTML = ``;
-      state.filter = evt.target.value;
-      const filtered = filterEvents(state.events, state.filter);
-      renderEvents(filtered);
-      Object(_statistics__WEBPACK_IMPORTED_MODULE_3__["default"])(getStatistics(filtered));
-    };
-
-    fragment.appendChild(filter.element);
-  }
-
-  listOfFilter.innerHTML = ``;
-  listOfFilter.appendChild(fragment);
-};
-
-renderFilters(_data__WEBPACK_IMPORTED_MODULE_4__["filters"]);
-eventContaiter.innerHTML = `Loading route...`;
-api.getPoints()
-  .then((events) => {
-    renderEvents(events);
-    state.events = events;
-  })
-  .catch(() => {
-    eventContaiter.innerHTML = `Something went wrong while loading your route info. Check your connection or try again later`;
-  });
-Object(_view_mode__WEBPACK_IMPORTED_MODULE_5__["default"])();
 
 
 /***/ }),
 
-/***/ "./src/model-event.js":
-/*!****************************!*\
-  !*** ./src/model-event.js ***!
-  \****************************/
+/***/ "./src/sorter.js":
+/*!***********************!*\
+  !*** ./src/sorter.js ***!
+  \***********************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-class ModelEvent {
-  constructor(data) {
-    this.id = data[`id`];
-    this.type = data[`type`];
-    this.dateFrom = new Date(data[`date_from`]);
-    this.dateTo = new Date(data[`date_to`]);
-    this.price = data[`base_price`];
-    this.offers = new Map();
-    this.city = data[`destination`][`name`];
-    this.photos = data[`destination`].pictures || [];
-    this.description = data.destination.description;
-    this.isFavorite = data[`is_favorite`] === `true` ? true : false;
+/* harmony import */ var _component__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./component */ "./src/component.js");
 
-    data[`offers`].forEach((item) => {
-      this.offers.set(item[`title`], {
-        price: item[`price`],
-        isChecked: item[`accepted`],
-      });
-    });
+
+class Sorter extends _component__WEBPACK_IMPORTED_MODULE_0__["default"] {
+  constructor(sortOption) {
+    super();
+    this._value = sortOption.value;
+    this._checked = sortOption.isChecked;
+    this._onChange = this._onChangeRadioSort.bind(this);
   }
 
-  static parseEvent(data) {
-    return new ModelEvent(data);
+  _onChangeRadioSort(evt) {
+    if (typeof this._onChangeRadioSort === `function`) {
+      this._onChangeRadioSort(evt);
+    }
   }
 
-  static parseEvents(data) {
-    return data.map(ModelEvent.parseEvent);
+  get template() {
+    return `
+      <div>
+        <input type="radio" name="trip-sorting" id="sorting-${this._value}" value="${this._value}" ${this._checked ? `checked` : ``}>
+        <label class="trip-sorting__item trip-sorting__item--${this._value}" for="sorting-${this._value}">${this._value.toUpperCase()}</label>
+      </div>`.trim();
+  }
+
+  set onChange(fn) {
+    this._onChangeRadioSort = fn;
+  }
+
+  bind() {
+    this.element.addEventListener(`change`, this._onChange);
   }
 }
 
-/* harmony default export */ __webpack_exports__["default"] = (ModelEvent);
+/* harmony default export */ __webpack_exports__["default"] = (Sorter);
+
+
+/***/ }),
+
+/***/ "./src/state.js":
+/*!**********************!*\
+  !*** ./src/state.js ***!
+  \**********************/
+/*! exports provided: state, getStateEvents */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "state", function() { return state; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getStateEvents", function() { return getStateEvents; });
+/* harmony import */ var _filter_events__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./filter-events */ "./src/filter-events.js");
+/* harmony import */ var _sort_events__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./sort-events */ "./src/sort-events.js");
+
+
+
+const state = {
+  events: null,
+  filter: `everything`,
+  sort: `event`,
+  mode: `default`,
+};
+
+const getStateEvents = () => {
+  const filtered = Object(_filter_events__WEBPACK_IMPORTED_MODULE_0__["filterEvents"])(state.events, state.filter);
+  return Object(_sort_events__WEBPACK_IMPORTED_MODULE_1__["sortEvents"])(filtered, state.sort);
+};
+
+
 
 
 /***/ }),
@@ -38865,18 +39303,28 @@ class ModelEvent {
 /*!***************************!*\
   !*** ./src/statistics.js ***!
   \***************************/
-/*! exports provided: default */
+/*! exports provided: updateData, getStatistics */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "updateData", function() { return updateData; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getStatistics", function() { return getStatistics; });
 /* harmony import */ var chart_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! chart.js */ "./node_modules/chart.js/dist/Chart.js");
 /* harmony import */ var chart_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(chart_js__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var chartjs_plugin_datalabels__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! chartjs-plugin-datalabels */ "./node_modules/chartjs-plugin-datalabels/dist/chartjs-plugin-datalabels.js");
 /* harmony import */ var chartjs_plugin_datalabels__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(chartjs_plugin_datalabels__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./constants */ "./src/constants.js");
+/* harmony import */ var moment__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! moment */ "./node_modules/moment/moment.js");
+/* harmony import */ var moment__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(moment__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var moment_duration_format__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! moment-duration-format */ "./node_modules/moment-duration-format/lib/moment-duration-format.js");
+/* harmony import */ var moment_duration_format__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(moment_duration_format__WEBPACK_IMPORTED_MODULE_4__);
 
 
 
+
+
+moment_duration_format__WEBPACK_IMPORTED_MODULE_4___default()(moment__WEBPACK_IMPORTED_MODULE_3___default.a);
 
 const moneyCtx = document.querySelector(`.statistic__money`);
 const transportCtx = document.querySelector(`.statistic__transport`);
@@ -38885,26 +39333,53 @@ const timeSpendCtx = document.querySelector(`.statistic__time-spend`);
 const BAR_HEIGHT = 55;
 moneyCtx.height = BAR_HEIGHT * 9;
 transportCtx.height = BAR_HEIGHT * 6;
-timeSpendCtx.height = BAR_HEIGHT * 4;
+timeSpendCtx.height = BAR_HEIGHT * 9;
 
 const updateData = (data) => {
   moneyChart.data.datasets.forEach((it) => {
-    it.data = [...data.spentMoney.values()];
+    it.data = [...data.spentMoneyTypes.values()];
   });
   transportChart.data.datasets.forEach((it) => {
-    it.data = [...data.wasUsed.values()];
+    it.data = [...data.wasUsedTypes.values()];
+  });
+  timeSpendChart.data.datasets.forEach((it) => {
+    it.data = [...data.spentTimeTypes.values()];
   });
   moneyChart.update();
   transportChart.update();
+  timeSpendChart.update();
+};
+
+const getStatistics = (events, cb) => {
+  const currentDate = new Date();
+  _constants__WEBPACK_IMPORTED_MODULE_2__["STATISTIC"].spentMoneyTypes.forEach((item, key) => _constants__WEBPACK_IMPORTED_MODULE_2__["STATISTIC"].spentMoneyTypes.set(key, 0));
+  _constants__WEBPACK_IMPORTED_MODULE_2__["STATISTIC"].wasUsedTypes.forEach((item, key) => _constants__WEBPACK_IMPORTED_MODULE_2__["STATISTIC"].wasUsedTypes.set(key, 0));
+  _constants__WEBPACK_IMPORTED_MODULE_2__["STATISTIC"].spentTimeTypes.forEach((item, key) => _constants__WEBPACK_IMPORTED_MODULE_2__["STATISTIC"].spentTimeTypes.set(key, 0));
+
+  events.filter((it) => {
+    return it.dateFrom < currentDate;
+  }).forEach((item) => {
+    if (_constants__WEBPACK_IMPORTED_MODULE_2__["STATISTIC"].spentMoneyTypes.has(item.type)) {
+      _constants__WEBPACK_IMPORTED_MODULE_2__["STATISTIC"].spentMoneyTypes.set(item.type, _constants__WEBPACK_IMPORTED_MODULE_2__["STATISTIC"].spentMoneyTypes.get(item.type) + item.price);
+    }
+    if (_constants__WEBPACK_IMPORTED_MODULE_2__["STATISTIC"].wasUsedTypes.has(item.type)) {
+      _constants__WEBPACK_IMPORTED_MODULE_2__["STATISTIC"].wasUsedTypes.set(item.type, _constants__WEBPACK_IMPORTED_MODULE_2__["STATISTIC"].wasUsedTypes.get(item.type) + 1);
+    }
+    if (_constants__WEBPACK_IMPORTED_MODULE_2__["STATISTIC"].spentTimeTypes.has(item.type)) {
+      const spentTime = Math.floor(moment__WEBPACK_IMPORTED_MODULE_3___default.a.duration(moment__WEBPACK_IMPORTED_MODULE_3___default()(item.dateTo).diff(item.dateFrom)) / 1000 / 60 / 60);
+      _constants__WEBPACK_IMPORTED_MODULE_2__["STATISTIC"].spentTimeTypes.set(item.type, _constants__WEBPACK_IMPORTED_MODULE_2__["STATISTIC"].spentTimeTypes.get(item.type) + spentTime);
+    }
+  });
+  cb(_constants__WEBPACK_IMPORTED_MODULE_2__["STATISTIC"]);
 };
 
 const moneyChart = new chart_js__WEBPACK_IMPORTED_MODULE_0___default.a(moneyCtx, {
   plugins: [chartjs_plugin_datalabels__WEBPACK_IMPORTED_MODULE_1___default.a],
   type: `horizontalBar`,
   data: {
-    labels: [`✈️ FLY`, `🏨 STAY`, `🚗 DRIVE`, `🏛️ LOOK`, `🍴 EAT`, `🚕 RIDE`, `🛳️ SAIL`, `🚂 TRAIN`, `🚌 BUS`],
+    labels: [`✈️FLY`, `🏨 STAY`, `🚕 TAXI`, `🏛️ LOOK`, `🍴 EAT`, `🚗 DRIVE`, `🛳️ SAIL`, `🚂 TRAIN`, `🚌 BUS`],
     datasets: [{
-      data: [400, 300, 200, 160, 150, 100],
+      data: [],
       backgroundColor: `#ffffff`,
       hoverBackgroundColor: `#ffffff`,
       anchor: `start`,
@@ -38969,7 +39444,7 @@ const transportChart = new chart_js__WEBPACK_IMPORTED_MODULE_0___default.a(trans
   data: {
     labels: [`🚗 DRIVE`, `🚕 RIDE`, `✈️ FLY`, `🛳️ SAIL`, `🚂 TRAIN`, `🚌 BUS`],
     datasets: [{
-      data: [4, 3, 2, 1],
+      data: [],
       backgroundColor: `#ffffff`,
       hoverBackgroundColor: `#ffffff`,
       anchor: `start`,
@@ -39028,7 +39503,107 @@ const transportChart = new chart_js__WEBPACK_IMPORTED_MODULE_0___default.a(trans
   },
 });
 
-/* harmony default export */ __webpack_exports__["default"] = (updateData);
+const timeSpendChart = new chart_js__WEBPACK_IMPORTED_MODULE_0___default.a(timeSpendCtx, {
+  plugins: [chartjs_plugin_datalabels__WEBPACK_IMPORTED_MODULE_1___default.a],
+  type: `horizontalBar`,
+  data: {
+    labels: [`✈️AIRCRAFT`, `🏨 HOTEL`, `🚕 TAXI`, `🏛️ LOOK`, `🍴 RESTAURANTS`, `🚗 DRIVE`, `🛳️ SHIP`, `🚂 TRAIN`, `🚌 BUS`],
+    datasets: [{
+      data: [],
+      backgroundColor: `#ffffff`,
+      hoverBackgroundColor: `#ffffff`,
+      anchor: `start`,
+    }],
+  },
+  options: {
+    plugins: {
+      datalabels: {
+        font: {
+          size: 13
+        },
+        color: `#000000`,
+        anchor: `end`,
+        align: `start`,
+        formatter: (val) => `${val}H`
+      }
+    },
+    title: {
+      display: true,
+      text: `TIME SPENT`,
+      fontColor: `#000000`,
+      fontSize: 23,
+      position: `left`
+    },
+    scales: {
+      yAxes: [{
+        ticks: {
+          fontColor: `#000000`,
+          padding: 5,
+          fontSize: 13,
+        },
+        gridLines: {
+          display: false,
+          drawBorder: false
+        },
+        barThickness: 44
+      }],
+      xAxes: [{
+        ticks: {
+          display: false,
+          beginAtZero: true,
+        },
+        gridLines: {
+          display: false,
+          drawBorder: false
+        },
+        minBarLength: 50
+      }],
+    },
+    legend: {
+      display: false
+    },
+    tooltips: {
+      enabled: false,
+    }
+  }
+});
+
+
+
+
+/***/ }),
+
+/***/ "./src/total-cost.js":
+/*!***************************!*\
+  !*** ./src/total-cost.js ***!
+  \***************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _component__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./component */ "./src/component.js");
+
+
+class TotalCost extends _component__WEBPACK_IMPORTED_MODULE_0__["default"] {
+  constructor(data) {
+    super();
+    this._cost = TotalCost.countTotalCosts(data);
+  }
+
+  get template() {
+    return `<p class="trip__total">Total: <span class="trip__total-cost">&euro;&nbsp;${this._cost}</span></p>`;
+  }
+
+  static countTotalCosts(events) {
+    if (events.length === 1) {
+      return events[0].price;
+    }
+    return events.reduce((a, c) => a + c.price, 0);
+  }
+}
+
+/* harmony default export */ __webpack_exports__["default"] = (TotalCost);
 
 
 /***/ }),
@@ -39037,16 +39612,25 @@ const transportChart = new chart_js__WEBPACK_IMPORTED_MODULE_0___default.a(trans
 /*!*********************!*\
   !*** ./src/util.js ***!
   \*********************/
-/*! exports provided: createElement */
+/*! exports provided: createElement, makeImage */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "createElement", function() { return createElement; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "makeImage", function() { return makeImage; });
 const createElement = (template) => {
   const newElement = document.createElement(`div`);
   newElement.innerHTML = template;
   return newElement.firstChild;
+};
+
+const makeImage = (src, alt, className) => {
+  const img = new Image();
+  img.src = src;
+  img.alt = alt;
+  img.classList.add(className);
+  return img;
 };
 
 
@@ -39063,107 +39647,39 @@ const createElement = (template) => {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-const viewMode = document.querySelectorAll(`.view-switch__item`);
+/* harmony import */ var _statistics__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./statistics */ "./src/statistics.js");
+/* harmony import */ var _state__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./state */ "./src/state.js");
 
-const onClickToggleModeView = () => {
-  viewMode.forEach((item) => {
-    item.addEventListener(`click`, (evt) => {
-      const target = evt.target;
-      evt.preventDefault();
-      if (target.closest(`.view-switch__item--active`)) {
-        return;
-      }
-      const previousModeLink = document.querySelector(`.view-switch__item--active`);
-      const lastHash = previousModeLink.hash.substring(1);
-      const currentHash = target.hash.substring(1);
-      const previousModeElement = document.querySelector(`#${lastHash}`);
-      const targetElement = document.querySelector(`#${currentHash}`);
-      previousModeLink.classList.remove(`view-switch__item--active`);
-      targetElement.classList.remove(`visually-hidden`);
-      previousModeElement.classList.add(`visually-hidden`);
-      target.classList.add(`view-switch__item--active`);
-    });
+
+
+const viewItems = document.querySelectorAll(`.view-switch__item`);
+
+const buttonClickToggleModeHandler = (evt) => {
+  const target = evt.target;
+  evt.preventDefault();
+  if (target.closest(`.view-switch__item--active`)) {
+    return;
+  }
+  const previousModeLink = document.querySelector(`.view-switch__item--active`);
+  const lastHash = previousModeLink.hash.substring(1);
+  const currentHash = target.hash.substring(1);
+  const previousModeElement = document.querySelector(`#${lastHash}`);
+  const targetElement = document.querySelector(`#${currentHash}`);
+  Object(_statistics__WEBPACK_IMPORTED_MODULE_0__["getStatistics"])(_state__WEBPACK_IMPORTED_MODULE_1__["state"].events, _statistics__WEBPACK_IMPORTED_MODULE_0__["updateData"]);
+  previousModeLink.classList.remove(`view-switch__item--active`);
+  targetElement.classList.remove(`visually-hidden`);
+  previousModeElement.classList.add(`visually-hidden`);
+  target.classList.add(`view-switch__item--active`);
+  window.scrollTo(0, 0);
+};
+
+const toggleMode = () => {
+  viewItems.forEach((item) => {
+    item.addEventListener(`click`, buttonClickToggleModeHandler);
   });
 };
 
-/* harmony default export */ __webpack_exports__["default"] = (onClickToggleModeView);
-
-
-/***/ }),
-
-/***/ "./src/waypoint.js":
-/*!*************************!*\
-  !*** ./src/waypoint.js ***!
-  \*************************/
-/*! exports provided: default */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _data__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./data */ "./src/data.js");
-/* harmony import */ var _component__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./component */ "./src/component.js");
-/* harmony import */ var moment__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! moment */ "./node_modules/moment/moment.js");
-/* harmony import */ var moment__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(moment__WEBPACK_IMPORTED_MODULE_2__);
-/* harmony import */ var moment_duration_format__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! moment-duration-format */ "./node_modules/moment-duration-format/lib/moment-duration-format.js");
-/* harmony import */ var moment_duration_format__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(moment_duration_format__WEBPACK_IMPORTED_MODULE_3__);
-
-
-
-
-
-moment_duration_format__WEBPACK_IMPORTED_MODULE_3___default()(moment__WEBPACK_IMPORTED_MODULE_2___default.a);
-
-class Waypoint extends _component__WEBPACK_IMPORTED_MODULE_1__["default"] {
-  constructor(data) {
-    super();
-    this._type = data.type;
-    this._dateFrom = data.dateFrom;
-    this._dateTo = data.dateTo;
-    this._duration = null;
-    this._price = data.price;
-    this._offers = data.offers;
-    this._city = data.city;
-    this._onClick = null;
-  }
-
-  get template() {
-    const startDate = moment__WEBPACK_IMPORTED_MODULE_2___default()(this._dateFrom);
-    const endDate = moment__WEBPACK_IMPORTED_MODULE_2___default()(this._dateTo);
-    this._duration = moment__WEBPACK_IMPORTED_MODULE_2___default.a.duration(endDate.diff(startDate)).format(`h[H] m[M]`);
-    const filteredOffers = [];
-    this._offers.forEach((item, key) => {
-      if (item.isChecked) {
-        filteredOffers.push(key);
-      }
-    });
-    return `<article class="trip-point">
-          <i class="trip-icon">${_data__WEBPACK_IMPORTED_MODULE_0__["TYPE_EVENTS"][this._type]}</i>
-          <h3 class="trip-point__title">Flight to ${this._city}</h3>
-          <p class="trip-point__schedule">
-            <span class="trip-point__timetable">${startDate.format(`H:mm`)} — ${endDate.format(`H:mm`)}</span>
-            <span class="trip-point__duration">${this._duration}</span>
-          </p>
-          <p class="trip-point__price">&euro;&nbsp;${this._price ? this._price : 0}</p>
-          <ul class="trip-point__offers">
-          ${filteredOffers.map((offer) => `<li><button class="trip-point__offer">${offer}</button></li>`).join(``)}
-          </ul>
-        </article>`.trim();
-  }
-
-  bind() {
-    this._element.addEventListener(`click`, this._onClick);
-  }
-
-  unbind() {
-    this._element.removeAllListeners(`click`, this._onClick);
-  }
-
-  set onClick(func) {
-    this._onClick = func;
-  }
-}
-
-/* harmony default export */ __webpack_exports__["default"] = (Waypoint);
+/* harmony default export */ __webpack_exports__["default"] = (toggleMode);
 
 
 /***/ })
