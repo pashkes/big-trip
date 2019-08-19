@@ -7,11 +7,13 @@
     "eslint": "eslint src/**/*.js",
     "build": "webpack",
     "start": "webpack-dev-server --open",
+    "deploy": "webpack && gh-pages -d public",
     "test": "npm run eslint"
   },
   "devDependencies": {
     "eslint": "5.13.0",
     "eslint-config-htmlacademy": "0.5.2",
+    "gh-pages": "^2.1.1",
     "webpack": "4.29.5",
     "webpack-cli": "3.2.3",
     "webpack-dev-server": "3.2.0"
